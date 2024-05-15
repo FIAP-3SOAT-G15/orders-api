@@ -7,6 +7,7 @@ import com.fiap.order.domain.errors.SelfOrderManagementException
 import com.fiap.order.usecases.*
 import java.util.*
 
+
 class CustomerService(
     private val repository: CustomerGateway,
 ) : LoadCustomerUseCase,
