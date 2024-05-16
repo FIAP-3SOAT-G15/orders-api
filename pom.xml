@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.fiap</groupId>
-    <artifactId>order-api</artifactId>
+    <artifactId>order</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>order-api</name>
+    <name>order</name>
     <description>API</description>
     <properties>
         <java.version>17</java.version>
@@ -107,6 +107,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>3.1.4</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

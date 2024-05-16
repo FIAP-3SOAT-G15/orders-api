@@ -38,3 +38,9 @@ mercadopago:
   integration:
     posId: ${MP_POS_ID}
     webhookBaseUrl: ${MP_WEBHOOK_BASE_URL}
+
+clients:
+  stock-api:
+    url: http://localhost:8081
+  payments-api:
+    url: http://localhost:8082

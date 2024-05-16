@@ -10,7 +10,7 @@ import com.fiap.order.usecases.services.StockService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
-import services.PaymentService
+import com.fiap.order.usecases.services.PaymentService
 
 @Configuration
 @ComponentScan(basePackageClasses = [OrderApiApp::class])
@@ -60,11 +60,9 @@ class ServiceConfig {
     @Bean
     fun createPaymentService(
         paymentRepository: PaymentGateway,
-        paymentProvider: PaymentProviderGateway,
     ): PaymentService {
         return PaymentService(
             paymentRepository,
-            paymentProvider
         )
     }
 }

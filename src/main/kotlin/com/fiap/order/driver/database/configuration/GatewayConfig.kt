@@ -1,6 +1,8 @@
 package com.fiap.order.driver.database.configuration
 
 import com.fiap.order.OrderApiApp
+import com.fiap.order.adapter.client.PaymentsApiClient
+import com.fiap.order.adapter.client.StockApiClient
 import com.fiap.order.adapter.gateway.*
 import com.fiap.order.adapter.gateway.impl.*
 import com.fiap.order.driver.database.persistence.jpa.*
@@ -33,12 +35,12 @@ class GatewayConfig {
     }
 
     @Bean("StockGateway")
-    fun createStockGateway(stockJpaRepository: StockJpaRepository): StockGateway {
-        return StockGatewayImpl(stockJpaRepository)
+    fun createStockGateway(stockApiClient: StockApiClient): StockGateway {
+        return StockGatewayImpl(stockApiClient)
     }
 
     @Bean("PaymentGateway")
-    fun createPaymentGateway(paymentJpaRepository: PaymentJpaRepository): PaymentGateway {
-        return PaymentGatewayImpl(paymentJpaRepository)
+    fun createPaymentGateway(paymentJpaRepository: PaymentJpaRepository, paymentsApiClient: PaymentsApiClient): PaymentGateway {
+        return PaymentGatewayImpl(paymentJpaRepository, paymentsApiClient)
     }
 }

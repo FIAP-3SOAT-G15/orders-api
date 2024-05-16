@@ -4,7 +4,14 @@ import com.fiap.order.domain.entities.Stock
 
 
 interface StockGateway {
-    fun findByComponentNumber(componentNumber: Long): Stock?
 
-    fun update(stock: Stock): Stock
+    fun increment(
+        componentNumber: Long,
+        quantity: Long,
+    ): Stock
+
+    fun decrement(
+        componentNumber: Long,
+        quantity: Long,
+    ): Stock
 }
