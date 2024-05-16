@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.info.Info
 import io.swagger.v3.oas.annotations.servers.Server
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.cloud.openfeign.EnableFeignClients
 
 @SpringBootApplication
 @OpenAPIDefinition(
@@ -26,6 +27,7 @@ import org.springframework.boot.runApplication
         Server(url = "/"),
     ],
 )
+@EnableFeignClients
 class OrderApiApp
 
 fun main(args: Array<String>) {

@@ -1,0 +1,39 @@
+package com.fiap.order.adapter.client
+
+import com.fiap.order.domain.entities.Order
+import com.fiap.order.domain.entities.Payment
+import com.fiap.order.driver.web.request.PaymentRequest
+import org.springframework.cloud.openfeign.FeignClient
+import org.springframework.web.bind.annotation.*
+
+@FeignClient(name = "payments-client", url = "\${clients.payments-api.url}")
+interface PaymentsApiClient {
+
+    @RequestMapping(
+        method = [RequestMethod.GET],
+        value = ["/{orderNumber}"],
+        consumes = ["application/json"]
+    )
+    fun getByOrderNumber(@PathVariable orderNumber: Long): Payment
+
+    @RequestMapping(
+        method = [RequestMethod.POST],
+        value = ["/notifications/{orderNumber}"],
+        consumes = ["application/json"]
+    )
+    fun notify(
+        @PathVariable orderNumber: Long,
+        @RequestParam(value = "id") resourceId: String,
+        @RequestParam topic: String
+    ): Any
+
+    @RequestMapping(
+        method = [RequestMethod.POST],
+        value = ["/create/{orderNumber}"],
+        consumes = ["application/json"]
+    )
+    fun create(
+        @PathVariable orderNumber: Long,
+        @RequestBody order: Order
+    ): PaymentRequest
+}

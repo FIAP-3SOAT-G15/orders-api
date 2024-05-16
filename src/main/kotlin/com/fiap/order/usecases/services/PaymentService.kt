@@ -1,4 +1,4 @@
-package services
+package com.fiap.order.usecases.services
 
 import com.fiap.order.adapter.gateway.PaymentGateway
 import com.fiap.order.adapter.gateway.PaymentProviderGateway
@@ -14,7 +14,6 @@ import java.time.LocalDateTime
 
 class PaymentService(
     private val paymentRepository: PaymentGateway,
-    private val paymentProvider: PaymentProviderGateway,
 ) :
     LoadPaymentUseCase,
     ProvidePaymentRequestUseCase {
@@ -27,20 +26,6 @@ class PaymentService(
     }
 
     override fun providePaymentRequest(order: Order): PaymentRequest {
-        val paymentRequest = paymentProvider.createExternalOrder(order)
-        val payment =
-            Payment(
-                orderNumber = order.number!!,
-                externalOrderId = paymentRequest.externalOrderId,
-                externalOrderGlobalId = null,
-                paymentInfo = paymentRequest.paymentInfo,
-                createdAt = LocalDateTime.now(),
-                status = PaymentStatus.PENDING,
-                statusChangedAt = LocalDateTime.now(),
-            )
-
-        paymentRepository.create(payment)
-
-        return paymentRequest
+        return paymentRepository.createFromOrder(order)
     }
 }
