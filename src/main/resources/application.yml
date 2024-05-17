@@ -27,8 +27,6 @@ spring:
 admin:
   access-token: ${ADMIN_ACCESS_TOKEN}
 
-
-
 clients:
   stock-api:
     url: http://localhost:8081
