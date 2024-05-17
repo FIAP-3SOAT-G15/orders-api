@@ -1,5 +1,5 @@
 locals {
-  name     = "stockdb"
+  name     = "ordersdb"
   username = "master"
   port     = 5432
 }
@@ -65,7 +65,7 @@ module "security_group" {
 
 module "rds_params" {
   source = "terraform-aws-modules/ssm-parameter/aws"
-  name   = "/live/stock/db"
+  name   = "/live/orders/db"
   type   = "String"
 
   value = jsonencode({
