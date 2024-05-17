@@ -10,6 +10,3 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
-
-payment-provider:
-  mock: true
