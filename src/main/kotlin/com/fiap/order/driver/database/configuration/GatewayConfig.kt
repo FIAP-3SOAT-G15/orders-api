@@ -25,8 +25,8 @@ class GatewayConfig {
     }
 
     @Bean("ProductGateway")
-    fun createProductGateway(productJpaRepository: ProductJpaRepository): ProductGateway {
-        return ProductGatewayImpl(productJpaRepository)
+    fun createProductGateway(stockApiClient: StockApiClient): ProductGateway {
+        return ProductGatewayImpl(stockApiClient)
     }
 
     @Bean("CustomerGateway")

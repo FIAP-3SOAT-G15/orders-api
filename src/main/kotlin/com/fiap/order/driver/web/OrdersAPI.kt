@@ -138,4 +138,9 @@ interface OrdersAPI {
     fun cancel(
         @Parameter(description = "Número do pedido") @PathVariable orderNumber: Long,
     ): ResponseEntity<Order>
+
+
+    @PostMapping("/notify/{orderNumber}/confirmed")
+    fun confirm(@PathVariable orderNumber: Long) : ResponseEntity<Order>
+
 }

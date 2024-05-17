@@ -4,9 +4,11 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition
 import io.swagger.v3.oas.annotations.info.Contact
 import io.swagger.v3.oas.annotations.info.Info
 import io.swagger.v3.oas.annotations.servers.Server
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.cloud.openfeign.EnableFeignClients
+import org.springframework.cloud.openfeign.FeignAutoConfiguration
 
 @SpringBootApplication
 @OpenAPIDefinition(
@@ -28,6 +30,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients
     ],
 )
 @EnableFeignClients
+@ImportAutoConfiguration(value = [FeignAutoConfiguration::class])
 class OrderApiApp
 
 fun main(args: Array<String>) {

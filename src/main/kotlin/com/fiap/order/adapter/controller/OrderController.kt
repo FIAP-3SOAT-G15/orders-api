@@ -20,6 +20,7 @@ class OrderController(
     private val prepareOrderUseCase: PrepareOrderUseCase,
     private val completeOrderUseCase: CompleteOrderUseCase,
     private val cancelOrderStatusUseCase: CancelOrderStatusUseCase,
+    private val confirmOrderUseCase: ConfirmOrderUseCase
 ) : OrdersAPI {
     override fun getByOrderNumber(orderNumber: Long): ResponseEntity<Order> {
         return ResponseEntity.ok(loadOrdersUseCase.getByOrderNumber(orderNumber))
@@ -91,5 +92,9 @@ class OrderController(
 
     override fun cancel(orderNumber: Long): ResponseEntity<Order> {
         return ResponseEntity.ok(cancelOrderStatusUseCase.cancelOrder(orderNumber))
+    }
+
+    override fun confirm(orderNumber: Long): ResponseEntity<Order> {
+        return ResponseEntity.ok(confirmOrderUseCase.confirmOrder(orderNumber))
     }
 }

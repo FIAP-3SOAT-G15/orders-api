@@ -25,11 +25,11 @@ services:
     volumes:
       - stock_db:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=stock
+      - POSTGRES_DB=orders
       - POSTGRES_USER=selforder
       - POSTGRES_PASSWORD=self@Order123!
     ports:
-      - "5432:5432"
+      - "5434:5432"
     restart: always
 
 volumes:

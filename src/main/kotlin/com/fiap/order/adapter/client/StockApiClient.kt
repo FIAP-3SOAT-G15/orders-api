@@ -1,6 +1,7 @@
 package com.fiap.order.adapter.client
 
 import com.fiap.order.adapter.client.config.StockApiInterceptor
+import com.fiap.order.domain.entities.Product
 import com.fiap.order.domain.entities.Stock
 import com.fiap.order.driver.web.request.QuantityRequest
 import org.springframework.cloud.openfeign.FeignClient
@@ -14,7 +15,7 @@ interface StockApiClient {
 
     @RequestMapping(
         method = [RequestMethod.POST],
-        value = ["/{componentNumber}/increment"],
+        value = ["/admin/stock/{componentNumber}/increment"],
         consumes = ["application/json"]
     )
     fun increment(@PathVariable("componentNumber") componentNumber: Long,
@@ -22,11 +23,19 @@ interface StockApiClient {
 
     @RequestMapping(
         method = [RequestMethod.POST],
-        value = ["/{componentNumber}/decrement"],
+        value = ["/admin/stock/{componentNumber}/decrement"],
         consumes = ["application/json"]
     )
     fun decrement(
         @PathVariable("componentNumber") componentNumber: Long,
         @RequestBody quantityRequest: QuantityRequest,
     ): Stock
+
+    @RequestMapping(
+        method = [RequestMethod.GET],
+        value = ["/admin/products/{productNumber}"],
+        consumes = ["application/json"]
+    )
+    fun getByProductNumber(@PathVariable("productNumber") productNumber: Long): Product
+
 }

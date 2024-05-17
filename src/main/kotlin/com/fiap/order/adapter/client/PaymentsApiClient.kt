@@ -11,14 +11,14 @@ interface PaymentsApiClient {
 
     @RequestMapping(
         method = [RequestMethod.GET],
-        value = ["/{orderNumber}"],
+        value = ["/payments/{orderNumber}"],
         consumes = ["application/json"]
     )
     fun getByOrderNumber(@PathVariable orderNumber: Long): Payment
 
     @RequestMapping(
         method = [RequestMethod.POST],
-        value = ["/notifications/{orderNumber}"],
+        value = ["/payments/notifications/{orderNumber}"],
         consumes = ["application/json"]
     )
     fun notify(
@@ -29,7 +29,7 @@ interface PaymentsApiClient {
 
     @RequestMapping(
         method = [RequestMethod.POST],
-        value = ["/create/{orderNumber}"],
+        value = ["/payments/create/{orderNumber}"],
         consumes = ["application/json"]
     )
     fun create(
