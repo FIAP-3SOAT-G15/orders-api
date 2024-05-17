@@ -18,7 +18,6 @@ open class OrderService(
     private val getProductUseCase: LoadProductUseCase,
     private val adjustInventoryUseCase: AdjustStockUseCase,
     private val providePaymentRequestUseCase: ProvidePaymentRequestUseCase,
-    private val loadPaymentUseCase: LoadPaymentUseCase,
     private val transactionalRepository: TransactionalGateway,
 ) : LoadOrderUseCase,
     PlaceOrderUseCase,
@@ -65,8 +64,8 @@ open class OrderService(
             val products =
                 items.flatMap {
                     val product = getProductUseCase.getByProductNumber(it.productNumber)
-                    if (!product.isLogicalItem()) {
-                        product.components.mapNotNull { p -> p.number }.forEach { componentNumber ->
+                    if (!product.isLogicalItem()!!) {
+                        product.components?.mapNotNull { p -> p.number }?.forEach { componentNumber ->
                             adjustInventoryUseCase.decrement(componentNumber, it.quantity)
                         }
                     }
@@ -86,29 +85,18 @@ open class OrderService(
 
             providePaymentRequestUseCase.providePaymentRequest(order)
 
-            orderRepository.upsert(order.copy(status = OrderStatus.PENDING))
+            orderRepository.upsert(order.copy(status = OrderStatus.PENDING)
+                .copy(items = order.items.map { i -> i.copy(orderNumber = order.number) }))
         }
     }
 
     override fun confirmOrder(orderNumber: Long): Order {
         return transactionalRepository.transaction {
             val order = getByOrderNumber(orderNumber)
-
-            val payment = loadPaymentUseCase.getByOrderNumber(orderNumber)
-
-            if (payment.status != PaymentStatus.CONFIRMED) {
-                orderRepository.upsert(order.copy(status = OrderStatus.PENDING))
-                throw SelfOrderManagementException(
-                    errorType = ErrorType.PAYMENT_NOT_CONFIRMED,
-                    message = "Last payment not confirmed for order $orderNumber",
-                )
-            }
-
             when (order.status) {
                 OrderStatus.PENDING -> {
                     orderRepository.upsert(order.copy(status = OrderStatus.CONFIRMED))
                 }
-
                 else -> {
                     throw SelfOrderManagementException(
                         errorType = ErrorType.INVALID_ORDER_STATE_TRANSITION,

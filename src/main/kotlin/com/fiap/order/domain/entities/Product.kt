@@ -5,14 +5,15 @@ import java.math.BigDecimal
 
 data class Product(
     val number: Long? = null,
+    val orderNumber: Long? = null,
     val name: String,
     val price: BigDecimal,
     val description: String,
     val category: ProductCategory,
-    val minSub: Int,
-    val maxSub: Int,
-    val subItems: List<Product>,
-    val components: List<Component>,
+    val minSub: Int = 0,
+    val maxSub: Int = Int.MAX_VALUE,
+    val subItems: List<Product>? = arrayListOf(),
+    val components: List<Component>? = arrayListOf(),
 ) {
     fun update(newProduct: Product): Product =
         copy(
@@ -26,5 +27,5 @@ data class Product(
             components = newProduct.components,
         )
 
-    fun isLogicalItem() = components.isEmpty()
+    fun isLogicalItem() = components?.isEmpty()
 }

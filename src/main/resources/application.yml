@@ -27,17 +27,7 @@ spring:
 admin:
   access-token: ${ADMIN_ACCESS_TOKEN}
 
-payment-provider:
-  mock: true
 
-mercadopago:
-  api:
-    url: https://api.mercadopago.com
-    token: ${MP_TOKEN}
-    userId: ${MP_USER_ID}
-  integration:
-    posId: ${MP_POS_ID}
-    webhookBaseUrl: ${MP_WEBHOOK_BASE_URL}
 
 clients:
   stock-api:

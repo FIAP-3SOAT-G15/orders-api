@@ -45,7 +45,6 @@ class OrderServiceTest {
             getProductUseCase,
             adjustInventoryUseCase,
             providePaymentRequestUseCase,
-            loadPaymentUseCase,
             transactionalRepository,
         )
 

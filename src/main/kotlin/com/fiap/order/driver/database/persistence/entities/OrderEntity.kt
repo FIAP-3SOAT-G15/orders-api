@@ -20,12 +20,7 @@ class OrderEntity(
     @Enumerated(EnumType.STRING)
     @Column(name = "order_status")
     val status: OrderStatus,
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "order_item",
-        joinColumns = [JoinColumn(name = "order_item_order_number")],
-        inverseJoinColumns = [JoinColumn(name = "order_item_product_number")],
-    )
+    @OneToMany(mappedBy="orderNumber", cascade = [CascadeType.MERGE])
     val items: List<ProductEntity>,
     @Column(name = "order_total")
     val total: BigDecimal,

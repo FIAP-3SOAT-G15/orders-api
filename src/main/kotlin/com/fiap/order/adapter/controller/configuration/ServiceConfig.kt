@@ -33,7 +33,6 @@ class ServiceConfig {
         loadProductsUseCase: LoadProductUseCase,
         adjustInventoryUseCase: AdjustStockUseCase,
         providePaymentRequestUseCase: ProvidePaymentRequestUseCase,
-        loadPaymentUseCase: LoadPaymentUseCase,
         transactionalRepository: TransactionalGateway,
     ): OrderService {
         return OrderService(
@@ -42,7 +41,6 @@ class ServiceConfig {
             loadProductsUseCase,
             adjustInventoryUseCase,
             providePaymentRequestUseCase,
-            loadPaymentUseCase,
             transactionalRepository,
         )
     }
