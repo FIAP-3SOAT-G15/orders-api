@@ -1,6 +1,6 @@
 spring:
   application:
-    name: order-api
+    name: orders-api
   datasource:
     url: jdbc:postgresql://${DB_ENDPOINT}/${DB_NAME}
     username: ${DB_USERNAME}

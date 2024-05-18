@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  app:
+  build:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
