@@ -29,6 +29,6 @@ admin:
 
 clients:
   stock-api:
-    url: http://localhost:8081
+    url: ${STOCK_SERVICE_URL}
   payments-api:
-    url: http://localhost:8082
+    url: ${PAYMENTS_SERVICE_URL}
