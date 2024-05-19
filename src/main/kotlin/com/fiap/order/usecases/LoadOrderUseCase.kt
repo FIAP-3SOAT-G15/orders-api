@@ -8,10 +8,12 @@ interface LoadOrderUseCase {
     fun getByOrderNumber(orderNumber: Long): Order
 
     fun findAll(): List<Order>
+    
+    fun findAllActive(): List<Order>
 
     fun findByStatus(status: OrderStatus): List<Order>
 
     fun findByCustomerId(customerId: UUID): List<Order>
 
-    fun findByCustomerIdAndStatus(customerId: UUID, status: OrderStatus): List<Order>
+    fun findByStatusAndCustomerId(status: OrderStatus, customerId: UUID): List<Order>
 }

@@ -38,7 +38,7 @@ class PaymentGatewayImpl(
         
         return paymentsApiClient.create(paymentHTTPRequest)
     }
-    
+
     companion object {
         const val ANONYMOUS = "Anonymous"
     }

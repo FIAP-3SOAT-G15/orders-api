@@ -20,15 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam
 @Tag(name = "pedido", description = "Pedidos")
 @RequestMapping("/orders")
 interface OrdersAPI {
-    @Operation(summary = "Retorna todos os pedidos")
-    @ApiResponses(
-        value = [
-            ApiResponse(responseCode = "200", description = "Operação bem-sucedida"),
-        ],
-    )
-    @GetMapping
-    fun findAll(): ResponseEntity<List<Order>>
-
+    
     @Operation(summary = "Retorna pedido pelo número")
     @ApiResponses(
         value = [
@@ -41,6 +33,24 @@ interface OrdersAPI {
         @Parameter(description = "Número do pedido") @PathVariable orderNumber: Long,
     ): ResponseEntity<Order>
 
+    @Operation(summary = "Retorna todos os pedidos")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Operação bem-sucedida"),
+        ],
+    )
+    @GetMapping
+    fun findAll(): ResponseEntity<List<Order>>
+
+    @Operation(summary = "Retorna todos os pedidos ativos")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Operação bem-sucedida"),
+        ],
+    )
+    @GetMapping("/status/active")
+    fun findAllActive(): ResponseEntity<List<Order>>
+    
     @Operation(summary = "Retorna pedidos por status")
     @ApiResponses(
         value = [
@@ -49,7 +59,7 @@ interface OrdersAPI {
         ],
     )
     @GetMapping("/status/{status}")
-    fun getByStatus(
+    fun findByStatus(
         @Parameter(description = "Status do pedido") @PathVariable status: String,
     ): ResponseEntity<List<Order>>
 
@@ -61,7 +71,7 @@ interface OrdersAPI {
         ],
     )
     @GetMapping("/status/{status}/customer")
-    fun getByStatusAndCustomerId(
+    fun findByStatusAndCustomerId(
         @Parameter(description = "Status do pedido") @PathVariable status: String,
         @Parameter(description = "Apelido do cliente") @RequestParam(required = false) customerId: String,
     ): ResponseEntity<List<Order>>
@@ -73,7 +83,7 @@ interface OrdersAPI {
         ],
     )
     @GetMapping("customer")
-    fun getByCustomerId(
+    fun findByCustomerId(
         @Parameter(description = "Apelido do cliente") @RequestParam(required = false) customerId: String,
     ): ResponseEntity<List<Order>>
 
