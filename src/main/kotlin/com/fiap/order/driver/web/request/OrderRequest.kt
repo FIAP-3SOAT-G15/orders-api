@@ -11,5 +11,5 @@ data class OrderRequest(
     )
     val items: List<OrderItemRequest>,
 ) {
-    fun toOrderItemDomain() = items.map { OrderItem(productNumber = it.productNumber, quantity = it.quantity) }
+    fun toOrderItemsDomain() = items.map { OrderItem(productNumber = it.productNumber, quantity = it.quantity) }
 }

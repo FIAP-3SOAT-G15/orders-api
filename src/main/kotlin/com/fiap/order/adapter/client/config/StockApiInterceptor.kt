@@ -6,6 +6,7 @@ import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 
 class StockApiInterceptor: RequestInterceptor {
+    
     override fun apply(template: RequestTemplate?) {
         val requestAttr = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes)
         val apiToken = requestAttr.request.getHeader("authorization")

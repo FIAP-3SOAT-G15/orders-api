@@ -13,8 +13,5 @@ interface LoadOrderUseCase {
 
     fun findByCustomerId(customerId: UUID): List<Order>
 
-    fun findByCustomerIdAndStatus(
-        customerId: UUID,
-        status: OrderStatus,
-    ): List<Order>
+    fun findByCustomerIdAndStatus(customerId: UUID, status: OrderStatus): List<Order>
 }

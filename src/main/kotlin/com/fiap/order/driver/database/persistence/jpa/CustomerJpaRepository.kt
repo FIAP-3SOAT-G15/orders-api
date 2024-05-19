@@ -10,5 +10,4 @@ interface CustomerJpaRepository : CrudRepository<CustomerEntity, String> {
     fun findByDocument(document: String): Optional<CustomerEntity>
 
     fun findByNameContainingIgnoreCase(customerName: String): List<CustomerEntity>
-
 }

@@ -7,25 +7,29 @@ import com.fiap.order.domain.entities.OrderItem
 import com.fiap.order.domain.errors.ErrorType
 import com.fiap.order.domain.errors.SelfOrderManagementException
 import com.fiap.order.domain.valueobjects.OrderStatus
-import com.fiap.order.domain.valueobjects.PaymentStatus
-import com.fiap.order.usecases.*
+import com.fiap.order.driver.web.response.PendingOrderResponse
+import com.fiap.order.usecases.AdjustStockUseCase
+import com.fiap.order.usecases.ChangeOrderStatusUseCase
+import com.fiap.order.usecases.CreateOrderUseCase
+import com.fiap.order.usecases.LoadCustomerUseCase
+import com.fiap.order.usecases.LoadOrderUseCase
+import com.fiap.order.usecases.LoadProductUseCase
+import com.fiap.order.usecases.RequestPaymentUseCase
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 open class OrderService(
     private val orderRepository: OrderGateway,
     private val getCustomersUseCase: LoadCustomerUseCase,
-    private val getProductUseCase: LoadProductUseCase,
+    private val loadProductUseCase: LoadProductUseCase,
     private val adjustInventoryUseCase: AdjustStockUseCase,
-    private val providePaymentRequestUseCase: ProvidePaymentRequestUseCase,
+    private val providePaymentRequestUseCase: RequestPaymentUseCase,
     private val transactionalRepository: TransactionalGateway,
 ) : LoadOrderUseCase,
-    PlaceOrderUseCase,
-    ConfirmOrderUseCase,
-    PrepareOrderUseCase,
-    CompleteOrderUseCase,
-    CancelOrderStatusUseCase {
+    CreateOrderUseCase,
+    ChangeOrderStatusUseCase
+{
     private val log = LoggerFactory.getLogger(javaClass)
     
     override fun getByOrderNumber(orderNumber: Long): Order {
@@ -55,7 +59,7 @@ open class OrderService(
     override fun create(
         customerId: UUID?,
         items: List<OrderItem>,
-    ): Order {
+    ): PendingOrderResponse {
         return transactionalRepository.transaction {
             if (items.isEmpty()) {
                 throw SelfOrderManagementException(
@@ -64,9 +68,10 @@ open class OrderService(
                 )
             }
 
+            // TODO: check for available stock in stock service
             val products =
                 items.flatMap {
-                    val product = getProductUseCase.getByProductNumber(it.productNumber)
+                    val product = loadProductUseCase.getByProductNumber(it.productNumber)
                     if (!product.isLogicalItem()!!) {
                         product.components?.mapNotNull { p -> p.number }?.forEach { componentNumber ->
                             adjustInventoryUseCase.decrement(componentNumber, it.quantity)
@@ -75,10 +80,10 @@ open class OrderService(
                     MutableList(it.quantity.toInt()) { product }
                 }
 
-            val order = orderRepository.upsert(
+            var order = orderRepository.upsert(
                 Order(
                     number = null,
-                    date = LocalDate.now(),
+                    orderedAt = LocalDateTime.now(),
                     customer = customerId?.let { getCustomersUseCase.findById(customerId) },
                     status = OrderStatus.CREATED,
                     items = products,
@@ -86,11 +91,21 @@ open class OrderService(
                 )
             )
 
-            providePaymentRequestUseCase.providePaymentRequest(order)
+            val payment = providePaymentRequestUseCase.requestPayment(order)
 
-            log.info("Storing order $order")
-            orderRepository.upsert(order.copy(status = OrderStatus.PENDING)
-                .copy(items = order.items.map { i -> i.copy(orderNumber = order.number) }))
+            order = orderRepository.upsert(
+                order.copy(
+                    status = OrderStatus.PENDING,
+                    items = order.items.map { i -> i.copy(orderNumber = order.number) },
+                )
+            )
+
+            log.info("Stored order: $order")
+
+            PendingOrderResponse(
+                order = order,
+                payment = payment,
+            )
         }
     }
 

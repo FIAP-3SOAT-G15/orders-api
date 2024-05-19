@@ -16,5 +16,4 @@ class StockGatewayImpl(
     override fun decrement(componentNumber: Long, quantity: Long): Stock {
         return stockApiClient.decrement(componentNumber, QuantityRequest(quantity));
     }
-
 }

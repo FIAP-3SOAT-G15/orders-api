@@ -4,8 +4,11 @@ import com.fiap.order.domain.entities.Order
 import com.fiap.order.domain.valueobjects.OrderStatus
 import com.fiap.order.driver.web.OrdersAPI
 import com.fiap.order.driver.web.request.OrderRequest
-import com.fiap.order.driver.web.response.OrderToPayResponse
-import com.fiap.order.usecases.*
+import com.fiap.order.driver.web.response.PendingOrderResponse
+import com.fiap.order.usecases.ChangeOrderStatusUseCase
+import com.fiap.order.usecases.LoadOrderUseCase
+import com.fiap.order.usecases.CreateOrderUseCase
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.core.ClaimAccessor
@@ -15,13 +18,12 @@ import java.util.*
 @RestController
 class OrderController(
     private val loadOrdersUseCase: LoadOrderUseCase,
-    private val createOrderUseCase: PlaceOrderUseCase,
-    private val loadPaymentUseCase: LoadPaymentUseCase,
-    private val prepareOrderUseCase: PrepareOrderUseCase,
-    private val completeOrderUseCase: CompleteOrderUseCase,
-    private val cancelOrderStatusUseCase: CancelOrderStatusUseCase,
-    private val confirmOrderUseCase: ConfirmOrderUseCase
-) : OrdersAPI {
+    private val createOrderUseCase: CreateOrderUseCase,
+    private val changeOrderStatusUseCase: ChangeOrderStatusUseCase,
+) : OrdersAPI
+{
+    private val log = LoggerFactory.getLogger(javaClass)
+
     override fun getByOrderNumber(orderNumber: Long): ResponseEntity<Order> {
         return ResponseEntity.ok(loadOrdersUseCase.getByOrderNumber(orderNumber))
     }
@@ -54,47 +56,39 @@ class OrderController(
             .run { return ResponseEntity.ok(this) }
     }
 
-    override fun create(orderRequest: OrderRequest): ResponseEntity<OrderToPayResponse> {
+    override fun create(orderRequest: OrderRequest): ResponseEntity<PendingOrderResponse> {
         var customerId: UUID? = null
         try {
             customerId = UUID.fromString(
-                (SecurityContextHolder.getContext().authentication.credentials as ClaimAccessor).getClaim<String>("custom:CUSTOMER_ID")
+                (SecurityContextHolder.getContext().authentication.credentials as ClaimAccessor)
+                    .getClaim("custom:CUSTOMER_ID")
             )
-        } catch (_: Exception) {
+        } catch (ex: Exception) {
+            log.error(ex.message, ex.cause)
         }
 
-        val order =
-            createOrderUseCase.create(
-                customerId,
-                orderRequest.toOrderItemDomain(),
-            )
-        val payment = loadPaymentUseCase.getByOrderNumber(order.number!!)
+        val orderToPayResponse = createOrderUseCase.create(customerId, orderRequest.toOrderItemsDomain())
 
-        return ResponseEntity.ok(
-            OrderToPayResponse(
-                order = order,
-                paymentInfo = payment.paymentInfo,
-            ),
-        )
+        return ResponseEntity.ok(orderToPayResponse)
     }
 
     override fun start(orderNumber: Long): ResponseEntity<Order> {
-        return ResponseEntity.ok(prepareOrderUseCase.startOrderPreparation(orderNumber))
+        return ResponseEntity.ok(changeOrderStatusUseCase.startOrderPreparation(orderNumber))
     }
 
     override fun finish(orderNumber: Long): ResponseEntity<Order> {
-        return ResponseEntity.ok(prepareOrderUseCase.finishOrderPreparation(orderNumber))
+        return ResponseEntity.ok(changeOrderStatusUseCase.finishOrderPreparation(orderNumber))
     }
 
     override fun complete(orderNumber: Long): ResponseEntity<Order> {
-        return ResponseEntity.ok(completeOrderUseCase.completeOrder(orderNumber))
+        return ResponseEntity.ok(changeOrderStatusUseCase.completeOrder(orderNumber))
     }
 
     override fun cancel(orderNumber: Long): ResponseEntity<Order> {
-        return ResponseEntity.ok(cancelOrderStatusUseCase.cancelOrder(orderNumber))
+        return ResponseEntity.ok(changeOrderStatusUseCase.cancelOrder(orderNumber))
     }
 
     override fun confirm(orderNumber: Long): ResponseEntity<Order> {
-        return ResponseEntity.ok(confirmOrderUseCase.confirmOrder(orderNumber))
+        return ResponseEntity.ok(changeOrderStatusUseCase.confirmOrder(orderNumber))
     }
 }

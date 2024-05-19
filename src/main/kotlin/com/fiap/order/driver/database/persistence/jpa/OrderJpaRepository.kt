@@ -10,10 +10,7 @@ interface OrderJpaRepository : CrudRepository<OrderEntity, Long> {
 
     fun findByCustomerId(customerId: UUID): List<OrderEntity>
 
-    fun findByCustomerIdAndStatus(
-        customerId: UUID,
-        status: OrderStatus,
-    ): List<OrderEntity>
+    fun findByCustomerIdAndStatus(customerId: UUID, status: OrderStatus): List<OrderEntity>
 
     fun findAllByStatusInOrderByStatusDescNumberAsc(status: Set<OrderStatus>): List<OrderEntity>
 }

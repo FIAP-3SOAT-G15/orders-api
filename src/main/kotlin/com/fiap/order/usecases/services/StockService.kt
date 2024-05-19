@@ -7,22 +7,17 @@ import org.slf4j.LoggerFactory
 
 class StockService(
     private val stockGateway: StockGateway,
-) :  AdjustStockUseCase {
+) :  AdjustStockUseCase
+{
     private val log = LoggerFactory.getLogger(javaClass)
 
-    override fun increment(
-        componentNumber: Long,
-        quantity: Long,
-    ): Stock {
-        log.info("Requesting stock of [$componentNumber] to be incremented")
+    override fun increment(componentNumber: Long, quantity: Long): Stock {
+        log.info("Requesting stock of product component [$componentNumber] to be incremented")
         return stockGateway.increment(componentNumber, quantity)
     }
 
-    override fun decrement(
-        componentNumber: Long,
-        quantity: Long,
-    ): Stock {
-        log.info("Requesting stock of [$componentNumber] to be decremented")
+    override fun decrement(componentNumber: Long, quantity: Long): Stock {
+        log.info("Requesting stock of product component [$componentNumber] to be decremented")
         return  stockGateway.decrement(componentNumber, quantity)
     }
 }
