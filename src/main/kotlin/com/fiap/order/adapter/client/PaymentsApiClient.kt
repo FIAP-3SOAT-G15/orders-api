@@ -29,11 +29,8 @@ interface PaymentsApiClient {
 
     @RequestMapping(
         method = [RequestMethod.POST],
-        value = ["/payments/create/{orderNumber}"],
+        value = ["/payments/create"],
         consumes = ["application/json"]
     )
-    fun create(
-        @PathVariable orderNumber: Long,
-        @RequestBody order: Order
-    ): PaymentRequest
+    fun create(@RequestBody order: Order): PaymentRequest
 }
