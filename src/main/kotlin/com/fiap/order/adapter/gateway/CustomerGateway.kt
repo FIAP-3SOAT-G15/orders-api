@@ -4,7 +4,6 @@ import com.fiap.order.domain.entities.Customer
 import java.util.*
 
 interface CustomerGateway {
-
     fun findAll(): List<Customer>
 
     fun findById(customerId: UUID): Customer?

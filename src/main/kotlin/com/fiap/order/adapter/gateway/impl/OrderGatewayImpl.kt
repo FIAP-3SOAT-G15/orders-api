@@ -50,23 +50,27 @@ class OrderGatewayImpl(
     }
 
     override fun upsert(order: Order): Order {
-        val currentOrder = order.number?.let { findByOrderNumber(number = order.number) } ?: order.copy(number = null)
+        val currentOrder = order.number?.let { findByOrderNumber(number = order.number) } 
+            ?: order.copy(number = null)
         val orderUpdated =
             currentOrder
                 .copy(
-                    date = order.date,
+                    orderedAt = order.orderedAt,
                     status = order.status,
                     customer = order.customer,
                     items = order.items,
                     total = order.total,
                 )
-        return orderUpdated
-            .let(mapper::toEntity)
-            .let(orderJpaRepository::save)
-            .let(mapper::toDomain)
+        return persist(orderUpdated)
     }
 
     override fun deleteAll() {
         orderJpaRepository.deleteAll()
     }
+    
+    private fun persist(order: Order): Order =
+        order
+            .let(mapper::toEntity)
+            .let(orderJpaRepository::save)
+            .let(mapper::toDomain)
 }

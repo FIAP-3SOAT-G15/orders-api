@@ -2,7 +2,7 @@ package com.fiap.order.driver.web
 
 import com.fiap.order.domain.entities.Order
 import com.fiap.order.driver.web.request.OrderRequest
-import com.fiap.order.driver.web.response.OrderToPayResponse
+import com.fiap.order.driver.web.response.PendingOrderResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -10,9 +10,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 
-@Tag(name = "pedido", description = "API de pedidos")
+@Tag(name = "pedido", description = "Pedidos")
 @RequestMapping("/orders")
 interface OrdersAPI {
     @Operation(summary = "Retorna todos os pedidos")
@@ -85,8 +90,19 @@ interface OrdersAPI {
     @PostMapping
     fun create(
         @Parameter(description = "Cadastro de pedido") @RequestBody orderRequest: OrderRequest,
-    ): ResponseEntity<OrderToPayResponse>
+    ): ResponseEntity<PendingOrderResponse>
 
+    @Operation(summary = "Confirma pedido")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Operação bem-sucedida"),
+            ApiResponse(responseCode = "404", description = "Pedido não encontrado"),
+            ApiResponse(responseCode = "400", description = "Pedido não pode ser confirmado"),
+        ],
+    )
+    @PostMapping("/{orderNumber}/confirm")
+    fun confirm(@PathVariable orderNumber: Long) : ResponseEntity<Order>
+    
     @Operation(summary = "Atualiza status de pedido em preparo")
     @ApiResponses(
         value = [
@@ -138,9 +154,4 @@ interface OrdersAPI {
     fun cancel(
         @Parameter(description = "Número do pedido") @PathVariable orderNumber: Long,
     ): ResponseEntity<Order>
-
-
-    @PostMapping("/notify/{orderNumber}/confirmed")
-    fun confirm(@PathVariable orderNumber: Long) : ResponseEntity<Order>
-
 }

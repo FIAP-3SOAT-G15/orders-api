@@ -6,14 +6,15 @@ import com.fiap.order.domain.entities.OrderItem
 import com.fiap.order.domain.errors.ErrorType
 import com.fiap.order.domain.errors.SelfOrderManagementException
 import com.fiap.order.domain.valueobjects.OrderStatus
-import com.fiap.order.domain.valueobjects.PaymentStatus
-import com.fiap.order.usecases.*
+import com.fiap.order.usecases.AdjustStockUseCase
+import com.fiap.order.usecases.LoadCustomerUseCase
+import com.fiap.order.usecases.LoadProductUseCase
+import com.fiap.order.usecases.RequestPaymentUseCase
 import com.fiap.order.usecases.services.OrderService
 import createCustomer
 import createOrder
 import createOrderItem
-import createPayment
-import createPaymentRequest
+import createPaymentResponse
 import createProduct
 import createStock
 import io.mockk.every
@@ -23,7 +24,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -35,8 +35,7 @@ class OrderServiceTest {
     private val getCustomersUseCase = mockk<LoadCustomerUseCase>()
     private val getProductUseCase = mockk<LoadProductUseCase>()
     private val adjustInventoryUseCase = mockk<AdjustStockUseCase>()
-    private val loadPaymentUseCase = mockk<LoadPaymentUseCase>()
-    private val providePaymentRequestUseCase = mockk<ProvidePaymentRequestUseCase>()
+    private val requestPaymentUseCase = mockk<RequestPaymentUseCase>()
     private val transactionalRepository = TransactionalGatewayImpl()
 
     private val orderService =
@@ -45,7 +44,7 @@ class OrderServiceTest {
             getCustomersUseCase,
             getProductUseCase,
             adjustInventoryUseCase,
-            providePaymentRequestUseCase,
+            requestPaymentUseCase,
             transactionalRepository,
         )
 
@@ -53,7 +52,7 @@ class OrderServiceTest {
     fun setUp() {
         every { getCustomersUseCase.getById(any()) } returns createCustomer()
         every { getProductUseCase.getByProductNumber(any()) } returns createProduct()
-        every { providePaymentRequestUseCase.providePaymentRequest(any()) } returns createPaymentRequest()
+        every { requestPaymentUseCase.requestPayment(any()) } returns createPaymentResponse()
     }
 
     @AfterEach
@@ -64,7 +63,7 @@ class OrderServiceTest {
     @Nested
     inner class GetByOrderNumberTest {
         @Test
-        fun `getByOrderNumber should return an Order when it exists`() {
+        fun `should find existent order`() {
             val order = createOrder()
 
             every { orderRepository.findByOrderNumber(order.number!!) } returns order
@@ -75,8 +74,8 @@ class OrderServiceTest {
         }
 
         @Test
-        fun `getByOrderNumber should throw an exception when the order is not found`() {
-            val orderNumber = 67890L
+        fun `should not find non-existent order`() {
+            val orderNumber = 1L
 
             every { orderRepository.findByOrderNumber(orderNumber) } returns null
 
@@ -89,7 +88,7 @@ class OrderServiceTest {
     @Nested
     inner class CreateTest {
         @Test
-        fun `create should return a valid Order when items are provided`() {
+        fun `create create order`() {
             val items = listOf(createOrderItem())
 
             every { adjustInventoryUseCase.decrement(any(), any()) } returns createStock()
@@ -98,9 +97,9 @@ class OrderServiceTest {
             val result = orderService.create(null, items)
 
             assertThat(result).isNotNull()
-            assertThat(result.number).isNotNull()
-            assertThat(result.items).hasSize(1)
-            assertThat(result.total).isEqualTo(BigDecimal("50.00"))
+            assertThat(result.order.number).isNotNull()
+            assertThat(result.order.items).hasSize(1)
+            assertThat(result.order.total).isEqualTo(BigDecimal("50.00"))
         }
 
         @Test
@@ -120,44 +119,12 @@ class OrderServiceTest {
             val order = createOrder(status = OrderStatus.PENDING)
 
             every { orderRepository.findByOrderNumber(any()) } returns order
-            every { loadPaymentUseCase.getByOrderNumber(any()) } returns createPayment(status = PaymentStatus.CONFIRMED)
             every { orderRepository.upsert(any()) } answers { firstArg() }
 
             val result = orderService.confirmOrder(order.number!!)
 
             assertThat(result).isNotNull()
             assertThat(result.status).isEqualTo(OrderStatus.CONFIRMED)
-        }
-
-        // TODO: check
-        @Disabled
-        fun `should not confirm an order when payment is not found`() {
-            val order = createOrder(status = OrderStatus.PENDING)
-
-            every { orderRepository.findByOrderNumber(any()) } returns order
-            every { loadPaymentUseCase.getByOrderNumber(any()) } throws (
-                    SelfOrderManagementException(ErrorType.PAYMENT_NOT_FOUND, message = "")
-                    )
-            every { orderRepository.upsert(any()) }
-
-            assertThatThrownBy { orderService.confirmOrder(order.number!!) }
-                .isInstanceOf(SelfOrderManagementException::class.java)
-                .hasFieldOrPropertyWithValue("errorType", ErrorType.PAYMENT_NOT_FOUND)
-        }
-
-        // TODO: check
-        @Disabled
-        fun `should not confirm an order when payment is not confirmed`() {
-            val order = createOrder(status = OrderStatus.PENDING)
-
-            every { orderRepository.findByOrderNumber(any()) } returns order
-            every { orderRepository.upsert(order) } returns order
-            every { loadPaymentUseCase.getByOrderNumber(any()) } returns createPayment(status = PaymentStatus.PENDING)
-            every { orderRepository.upsert(any()) } answers { firstArg() }
-
-            assertThatThrownBy { orderService.confirmOrder(order.number!!) }
-                .isInstanceOf(SelfOrderManagementException::class.java)
-                .hasFieldOrPropertyWithValue("errorType", ErrorType.PAYMENT_NOT_CONFIRMED)
         }
 
         @ParameterizedTest
@@ -167,7 +134,6 @@ class OrderServiceTest {
 
             every { orderRepository.findByOrderNumber(any()) } returns order
             every { orderRepository.upsert(order) } answers { firstArg() }
-            every { loadPaymentUseCase.getByOrderNumber(any()) } returns createPayment(status = PaymentStatus.CONFIRMED)
 
             assertThatThrownBy { orderService.confirmOrder(order.number!!) }
                 .isInstanceOf(SelfOrderManagementException::class.java)

@@ -10,7 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 
-@FeignClient(name = "stock-client", url = "\${clients.stock-api.url}", configuration = [StockApiInterceptor::class])
+@FeignClient(
+    name = "stock-client",
+    url = "\${clients.stock-api.url}",
+    configuration = [StockApiInterceptor::class]
+)
 interface StockApiClient {
 
     @RequestMapping(

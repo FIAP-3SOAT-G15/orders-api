@@ -9,7 +9,8 @@ import org.slf4j.LoggerFactory
 
 class ProductService(
     private val productGateway: ProductGateway,
-) : LoadProductUseCase {
+) : LoadProductUseCase
+{
     private val log = LoggerFactory.getLogger(javaClass)
     
     override fun getByProductNumber(productNumber: Long): Product {

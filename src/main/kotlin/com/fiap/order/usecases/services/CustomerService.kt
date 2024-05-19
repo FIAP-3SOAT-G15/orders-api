@@ -4,7 +4,11 @@ import com.fiap.order.adapter.gateway.CustomerGateway
 import com.fiap.order.domain.entities.Customer
 import com.fiap.order.domain.errors.ErrorType
 import com.fiap.order.domain.errors.SelfOrderManagementException
-import com.fiap.order.usecases.*
+import com.fiap.order.usecases.CreateCustomerUseCase
+import com.fiap.order.usecases.LoadCustomerUseCase
+import com.fiap.order.usecases.RemoveCustomerUseCase
+import com.fiap.order.usecases.SearchCustomerUseCase
+import com.fiap.order.usecases.UpdateCustomerUseCase
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -14,7 +18,8 @@ class CustomerService(
     SearchCustomerUseCase,
     CreateCustomerUseCase,
     UpdateCustomerUseCase,
-    RemoveCustomerUseCase {
+    RemoveCustomerUseCase
+{
     private val log = LoggerFactory.getLogger(javaClass)
     
     override fun getById(customerId: UUID): Customer {
