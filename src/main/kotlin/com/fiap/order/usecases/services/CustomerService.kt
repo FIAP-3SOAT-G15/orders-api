@@ -5,6 +5,7 @@ import com.fiap.order.domain.entities.Customer
 import com.fiap.order.domain.errors.ErrorType
 import com.fiap.order.domain.errors.SelfOrderManagementException
 import com.fiap.order.usecases.*
+import org.slf4j.LoggerFactory
 import java.util.*
 
 class CustomerService(
@@ -14,6 +15,8 @@ class CustomerService(
     CreateCustomerUseCase,
     UpdateCustomerUseCase,
     RemoveCustomerUseCase {
+    private val log = LoggerFactory.getLogger(javaClass)
+    
     override fun getById(customerId: UUID): Customer {
         return repository.findById(customerId)
             ?: throw SelfOrderManagementException(
@@ -39,14 +42,17 @@ class CustomerService(
     }
 
     override fun create(customer: Customer): Customer {
+        log.info("Creating customer $customer")
         return repository.create(customer.copy(id = UUID.randomUUID()))
     }
 
     override fun update(customer: Customer): Customer {
+        log.info("Updating customer $customer")
         return repository.update(customer)
     }
 
     override fun remove(customerId: UUID): Customer {
+        log.info("Removing customer [$customerId]")
         return repository.deleteById(customerId)
     }
 }

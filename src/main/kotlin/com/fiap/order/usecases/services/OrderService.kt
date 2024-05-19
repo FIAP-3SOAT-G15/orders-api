@@ -9,6 +9,7 @@ import com.fiap.order.domain.errors.SelfOrderManagementException
 import com.fiap.order.domain.valueobjects.OrderStatus
 import com.fiap.order.domain.valueobjects.PaymentStatus
 import com.fiap.order.usecases.*
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
@@ -25,6 +26,8 @@ open class OrderService(
     PrepareOrderUseCase,
     CompleteOrderUseCase,
     CancelOrderStatusUseCase {
+    private val log = LoggerFactory.getLogger(javaClass)
+    
     override fun getByOrderNumber(orderNumber: Long): Order {
         return orderRepository.findByOrderNumber(orderNumber)
             ?: throw SelfOrderManagementException(
@@ -85,6 +88,7 @@ open class OrderService(
 
             providePaymentRequestUseCase.providePaymentRequest(order)
 
+            log.info("Storing order $order")
             orderRepository.upsert(order.copy(status = OrderStatus.PENDING)
                 .copy(items = order.items.map { i -> i.copy(orderNumber = order.number) }))
         }
@@ -95,6 +99,7 @@ open class OrderService(
             val order = getByOrderNumber(orderNumber)
             when (order.status) {
                 OrderStatus.PENDING -> {
+                    log.info("Confirming order $order")
                     orderRepository.upsert(order.copy(status = OrderStatus.CONFIRMED))
                 }
                 else -> {
@@ -110,8 +115,9 @@ open class OrderService(
     override fun startOrderPreparation(orderNumber: Long): Order {
         return getByOrderNumber(orderNumber)
             .takeIf { it.status == OrderStatus.CONFIRMED }
-            ?.run {
-                orderRepository.upsert(copy(status = OrderStatus.PREPARING))
+            ?.let { order ->
+                log.info("Starting preparation of order $order")
+                orderRepository.upsert(order.copy(status = OrderStatus.PREPARING))
             }
             ?: throw SelfOrderManagementException(
                 errorType = ErrorType.INVALID_ORDER_STATE_TRANSITION,
@@ -122,8 +128,9 @@ open class OrderService(
     override fun completeOrder(orderNumber: Long): Order {
         return getByOrderNumber(orderNumber)
             .takeIf { it.status == OrderStatus.PREPARING }
-            ?.run {
-                orderRepository.upsert(copy(status = OrderStatus.COMPLETED))
+            ?.let { order ->
+                log.info("Completing order $order")
+                orderRepository.upsert(order.copy(status = OrderStatus.COMPLETED))
             }
             ?: throw SelfOrderManagementException(
                 errorType = ErrorType.INVALID_ORDER_STATE_TRANSITION,
@@ -134,8 +141,9 @@ open class OrderService(
     override fun finishOrderPreparation(orderNumber: Long): Order {
         return getByOrderNumber(orderNumber)
             .takeIf { it.status == OrderStatus.COMPLETED }
-            ?.run {
-                orderRepository.upsert(copy(status = OrderStatus.DONE))
+            ?.let { order ->
+                log.info("Finishing preparation of order $order")
+                orderRepository.upsert(order.copy(status = OrderStatus.DONE))
             }
             ?: throw SelfOrderManagementException(
                 errorType = ErrorType.INVALID_ORDER_STATE_TRANSITION,
@@ -147,14 +155,15 @@ open class OrderService(
         return transactionalRepository.transaction {
             getByOrderNumber(orderNumber)
                 .takeIf { it.status != OrderStatus.COMPLETED && it.status != OrderStatus.DONE }
-                ?.run {
-                    if (status == OrderStatus.CREATED || status == OrderStatus.CONFIRMED) {
+                ?.let { order ->
+                    log.info("Cancelling order $order")
+                    if (order.status == OrderStatus.CREATED || order.status == OrderStatus.CONFIRMED) {
                         // in this case, make reserved products available again
-                        items.forEach {
+                        order.items.forEach {
                             it.number?.let { number -> adjustInventoryUseCase.increment(number, 1) }
                         }
                     }
-                    orderRepository.upsert(copy(status = OrderStatus.CANCELLED))
+                    orderRepository.upsert(order.copy(status = OrderStatus.CANCELLED))
                 }
                 ?: throw SelfOrderManagementException(
                     errorType = ErrorType.INVALID_ORDER_STATE_TRANSITION,

@@ -34,7 +34,7 @@ class PaymentGatewayImpl(
     }
 
     override fun createFromOrder(order: Order): PaymentRequest {
-        return paymentsApiClient.create(order.number!!, order)
+        return paymentsApiClient.create(order)
     }
 
 
