@@ -1,4 +1,4 @@
-package com.fiap.order.driver.database.configuration
+package com.fiap.order.driver.database.config
 
 import com.fiap.order.OrderApiApp
 import com.fiap.order.adapter.client.PaymentsApiClient

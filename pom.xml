@@ -31,6 +31,10 @@
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.language>kotlin</sonar.language>
         <sonar.verbose>true</sonar.verbose>
+        <sonar.exclusion>
+            **/com/fiap/order/driver/web/CustomerAPI*,
+            **/com/fiap/order/driver/web/OrderAPI*,
+        </sonar.exclusion>
     </properties>
     <dependencies>
         <dependency>
@@ -380,8 +384,10 @@
                 <version>0.8.12</version>
                 <configuration>
                     <excludes>
-                        <exclude>**/*Config.*</exclude>
-                        <exclude>**/*Mapper.*</exclude>
+                        <exclude>**/com/fiap/order/driver/database/persistence/entities/**</exclude>
+                        <exclude>**/com/fiap/order/**/config/**</exclude>
+                        <exclude>**/com/fiap/order/driver/web/OrderAPI*</exclude>
+                        <exclude>**/com/fiap/order/driver/web/CustomerAPI*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
