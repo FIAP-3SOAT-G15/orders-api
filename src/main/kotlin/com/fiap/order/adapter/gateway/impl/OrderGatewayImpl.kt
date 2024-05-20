@@ -46,9 +46,9 @@ class OrderGatewayImpl(
             currentOrder
                 .copy(
                     orderedAt = order.orderedAt,
-                    status = order.status,
                     customer = order.customer,
-                    items = order.items,
+                    status = order.status,
+                    lines = order.lines,
                     total = order.total,
                 )
         return persist(orderUpdated)

@@ -24,16 +24,21 @@ class OrderEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_number")
     val number: Long,
+
     @Column(name = "order_ordered_at")
     val orderedAt: LocalDateTime,
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "order_customer_id")
     val customer: CustomerEntity? = null,
+
     @Enumerated(EnumType.STRING)
     @Column(name = "order_status")
     val status: OrderStatus,
+
     @OneToMany(mappedBy="orderNumber", cascade = [CascadeType.MERGE])
-    val items: List<ProductEntity>,
+    val lines: List<OrderLineEntity>,
+
     @Column(name = "order_total")
     val total: BigDecimal,
 )

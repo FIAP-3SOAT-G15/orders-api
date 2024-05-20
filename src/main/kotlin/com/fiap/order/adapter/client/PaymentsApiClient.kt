@@ -1,7 +1,7 @@
 package com.fiap.order.adapter.client
 
 import com.fiap.order.driver.web.response.PaymentResponse
-import com.fiap.order.driver.web.request.PaymentHTTPRequest
+import com.fiap.order.driver.web.request.PaymentRequest
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.*
 
@@ -23,5 +23,5 @@ interface PaymentsApiClient {
         value = ["/payments"],
         consumes = ["application/json"]
     )
-    fun create(@RequestBody paymentHTTPRequest: PaymentHTTPRequest): PaymentResponse
+    fun create(@RequestBody paymentHTTPRequest: PaymentRequest): PaymentResponse
 }

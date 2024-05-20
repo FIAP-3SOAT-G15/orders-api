@@ -37,8 +37,8 @@ interface CustomerAPI {
         ],
     )
     @GetMapping("/{customerId}")
-    fun getById(
-        @Parameter(description = "Identificador do cliente") @PathVariable("customerId") customerId: String,
+    fun getByCustomerId(
+        @Parameter(description = "ID do cliente") @PathVariable("customerId") customerId: String,
     ): ResponseEntity<Customer?>
 
     @Operation(summary = "Pesquisa clientes por nome")

@@ -12,13 +12,20 @@ class ProductService(
 ) : LoadProductUseCase
 {
     private val log = LoggerFactory.getLogger(javaClass)
-    
-    override fun getByProductNumber(productNumber: Long): Product {
-        log.info("Requesting product [$productNumber]")
-        return productGateway.findByProductNumber(productNumber)
-            ?: throw SelfOrderManagementException(
+
+    override fun getByProductNumbers(productNumbers: List<Long>): List<Product> {
+        val setOfProductNumbers = productNumbers.toSet()
+        
+        log.info("Requesting products: $productNumbers")
+        val fetchedProducts = productGateway.findByProductNumbers(setOfProductNumbers.toList())
+        val setOfFetchedProductIds = fetchedProducts.map { it.number }.toSet()
+        
+        if (setOfProductNumbers.minus(setOfFetchedProductIds).isNotEmpty()) {
+            throw SelfOrderManagementException(
                 errorType = ErrorType.PRODUCT_NOT_FOUND,
-                message = "Product [$productNumber] not found",
+                message = "Product(s) not found: ${setOfProductNumbers.minus(setOfFetchedProductIds)}",
             )
+        }
+        return fetchedProducts
     }
 }

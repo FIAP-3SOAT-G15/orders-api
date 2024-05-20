@@ -18,6 +18,7 @@ import com.fiap.order.createProduct
 import com.fiap.order.createStock
 import com.fiap.order.domain.valueobjects.PaymentStatus
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -53,7 +54,7 @@ class OrderServiceTest {
     @BeforeEach
     fun setUp() {
         every { getCustomersUseCase.getByCustomerId(any()) } returns createCustomer()
-        every { getProductUseCase.getByProductNumber(any()) } returns createProduct()
+        every { getProductUseCase.getByProductNumbers(any()) } returns listOf(createProduct())
         every { requestPaymentUseCase.requestPayment(any()) } returns createPaymentResponse()
     }
 
@@ -161,14 +162,14 @@ class OrderServiceTest {
         fun `should create order`() {
             val items = listOf(createOrderItem())
 
-            every { adjustInventoryUseCase.decrement(any(), any()) } returns createStock()
+            justRun { adjustInventoryUseCase.decrementStockOfProducts(any()) }
             every { orderRepository.upsert(any()) } returns createOrder(status = OrderStatus.CREATED)
 
             val result = orderService.create(null, items)
 
             assertThat(result).isNotNull()
             assertThat(result.order.number).isNotNull()
-            assertThat(result.order.items).hasSize(1)
+            assertThat(result.order.lines).hasSize(1)
             assertThat(result.order.total).isEqualTo(BigDecimal("50.00"))
         }
 
@@ -301,7 +302,7 @@ class OrderServiceTest {
 
             every { orderRepository.findByOrderNumber(any()) } returns order
             every { orderRepository.upsert(any()) } answers { firstArg() }
-            every { adjustInventoryUseCase.increment(any(), any()) } returns createStock()
+            justRun { adjustInventoryUseCase.incrementStockOfProducts(any()) }
 
             val result = orderService.cancelOrder(order.number!!)
 
@@ -315,7 +316,7 @@ class OrderServiceTest {
 
             every { orderRepository.findByOrderNumber(any()) } returns order
             every { orderRepository.upsert(any()) } answers { firstArg() }
-            every { adjustInventoryUseCase.increment(any(), any()) } returns createStock()
+            justRun { adjustInventoryUseCase.incrementStockOfProducts(any()) }
 
             val result = orderService.cancelOrder(order.number!!)
 

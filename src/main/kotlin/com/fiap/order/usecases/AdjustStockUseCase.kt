@@ -1,9 +1,7 @@
 package com.fiap.order.usecases
 
-import com.fiap.order.domain.entities.Stock
-
 interface AdjustStockUseCase {
-    fun increment(componentNumber: Long, quantity: Long): Stock
+    fun incrementStockOfProducts(productQuantityMap: Map<Long, Long>)
 
-    fun decrement(componentNumber: Long, quantity: Long): Stock
+    fun decrementStockOfProducts(productQuantityMap: Map<Long, Long>)
 }

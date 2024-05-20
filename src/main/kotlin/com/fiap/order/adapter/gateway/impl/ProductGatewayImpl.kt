@@ -8,7 +8,7 @@ class ProductGatewayImpl(
     private val stockApiClient: StockApiClient,
 ) : ProductGateway {
 
-    override fun findByProductNumber(productNumber: Long): Product {
-        return stockApiClient.getByProductNumber(productNumber)
+    override fun findByProductNumbers(productNumbers: List<Long>): List<Product> {
+        return stockApiClient.getByProductNumbers(productNumbers)
     }
 }

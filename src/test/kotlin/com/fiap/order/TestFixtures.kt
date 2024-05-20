@@ -1,14 +1,16 @@
 package com.fiap.order
 
-import com.fiap.order.domain.entities.Component
 import com.fiap.order.domain.entities.Customer
 import com.fiap.order.domain.entities.Order
 import com.fiap.order.domain.entities.OrderItem
+import com.fiap.order.domain.entities.OrderLine
 import com.fiap.order.domain.entities.Product
 import com.fiap.order.domain.entities.Stock
 import com.fiap.order.domain.valueobjects.OrderStatus
 import com.fiap.order.domain.valueobjects.PaymentStatus
-import com.fiap.order.domain.valueobjects.ProductCategory
+import com.fiap.order.driver.database.persistence.entities.CustomerEntity
+import com.fiap.order.driver.database.persistence.entities.OrderEntity
+import com.fiap.order.driver.database.persistence.entities.OrderLineEntity
 import com.fiap.order.driver.web.request.CustomerRequest
 import com.fiap.order.driver.web.request.OrderItemRequest
 import com.fiap.order.driver.web.request.OrderRequest
@@ -34,6 +36,15 @@ fun createCustomer(
     address = address,
 )
 
+fun Customer.toCustomerEntity() = CustomerEntity(
+    id = id.toString(),
+    document = document,
+    name = name,
+    email = email,
+    phone = phone,
+    address = address,
+)
+
 fun createCustomerRequest(
     document: String = "444.555.666-77",
     name: String = "John Doe",
@@ -51,23 +62,13 @@ fun createCustomerRequest(
 fun createProduct(
     number: Long = 123,
     name: String = "Big Mac",
-    category: ProductCategory = ProductCategory.MAIN,
-    price: BigDecimal = BigDecimal("10.00"),
     description: String = "Dois hambúrgueres, alface, queijo, molho especial, cebola, picles, num pão com gergelim",
-    minSub: Int = 3,
-    maxSub: Int = 3,
-    subitems: List<Product> = listOf(),
-    components: List<Component> = listOf(),
+    price: BigDecimal = BigDecimal("10.00"),
 ) = Product(
     number = number,
     name = name,
-    category = category,
-    price = price,
     description = description,
-    minSub = minSub,
-    maxSub = maxSub,
-    subItems = subitems,
-    components = components,
+    price = price,
 )
 
 fun createStock(
@@ -83,14 +84,54 @@ fun createOrder(
     orderedAt: LocalDateTime = LocalDateTime.parse("2023-10-01T18:00:00"),
     customer: Customer? = null,
     status: OrderStatus = OrderStatus.CREATED,
-    items: List<Product> = listOf(createProduct()),
+    lines: List<OrderLine> = listOf(createOrderLine()),
     total: BigDecimal = BigDecimal("50.00"),
 ) = Order(
     number = number,
     orderedAt = orderedAt,
     customer = customer,
     status = status,
-    items = items,
+    lines = lines,
+    total = total,
+)
+
+fun createOrderLine(
+    number: Long = 1,
+    orderNumber: Long = 98765,
+    productNumber: Long = 123,
+    name: String = "Big Mac",
+    description: String = "Dois hambúrgueres, alface, queijo, molho especial, cebola, picles, num pão com gergelim",
+    unitPrice: BigDecimal = BigDecimal("10.00"),
+    quantity: Long = 1L,
+    total: BigDecimal = BigDecimal("10.00"),
+) = OrderLine(
+    number = number,
+    orderNumber = orderNumber,
+    productNumber = productNumber,
+    name = name,
+    description = description,
+    unitPrice = unitPrice,
+    quantity = quantity,
+    total = total,
+)
+
+fun Order.toOrderEntity() = OrderEntity(
+    number = number ?: Random().nextLong(),
+    orderedAt = orderedAt,
+    customer = customer?.toCustomerEntity(),
+    status = status,
+    lines = lines.map { it.toOrderLineEntity() },
+    total = total,
+)
+
+fun OrderLine.toOrderLineEntity() = OrderLineEntity(
+    number = number!!,
+    orderNumber = orderNumber!!,
+    productNumber = productNumber,
+    name = name,
+    description = description,
+    unitPrice = unitPrice,
+    quantity = quantity,
     total = total,
 )
 
