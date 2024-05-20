@@ -34,10 +34,10 @@ class OrderGatewayImpl(
         orderRepository.findByStatus(status).map(mapper::toDomain)
 
     override fun findByStatusAndCustomerId(status: OrderStatus, customerId: UUID): List<Order> =
-        orderRepository.findByCustomerIdAndStatus(customerId, status).map(mapper::toDomain)
+        orderRepository.findByStatusAndCustomerId(status, customerId.toString()).map(mapper::toDomain)
     
     override fun findByCustomerId(customerId: UUID): List<Order> =
-        orderRepository.findByCustomerId(customerId).map(mapper::toDomain)
+        orderRepository.findByCustomerId(customerId.toString()).map(mapper::toDomain)
 
     override fun upsert(order: Order): Order {
         val currentOrder = order.number?.let { findByOrderNumber(number = order.number) } 

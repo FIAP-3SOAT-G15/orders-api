@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam
 
 @Tag(name = "pedido", description = "Pedidos")
 @RequestMapping("/orders")
-interface OrdersAPI {
+interface OrderAPI {
     
     @Operation(summary = "Retorna pedido pelo número")
     @ApiResponses(

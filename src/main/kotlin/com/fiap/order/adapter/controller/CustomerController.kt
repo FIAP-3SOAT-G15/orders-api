@@ -1,7 +1,7 @@
 package com.fiap.order.adapter.controller
 
 import com.fiap.order.domain.entities.Customer
-import com.fiap.order.driver.web.CustomersAPI
+import com.fiap.order.driver.web.CustomerAPI
 import com.fiap.order.driver.web.request.CustomerRequest
 import com.fiap.order.usecases.*
 import org.springframework.http.ResponseEntity
@@ -15,7 +15,7 @@ class CustomerController(
     private val createCustomerUseCase: CreateCustomerUseCase,
     private val updateCustomerUseCase: UpdateCustomerUseCase,
     private val removeCustomerUseCase: RemoveCustomerUseCase,
-) : CustomersAPI
+) : CustomerAPI
 {
     override fun getById(customerId: String): ResponseEntity<Customer?> {
         customerId

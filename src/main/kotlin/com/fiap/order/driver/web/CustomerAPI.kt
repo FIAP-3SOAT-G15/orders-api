@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam
 
 @Tag(name = "cliente", description = "Clientes")
 @RequestMapping("/customers")
-interface CustomersAPI {
+interface CustomerAPI {
     @Operation(summary = "Retorna todos os clientes")
     @ApiResponses(
         value = [

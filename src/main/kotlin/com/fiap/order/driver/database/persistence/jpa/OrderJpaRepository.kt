@@ -8,9 +8,9 @@ import java.util.*
 interface OrderJpaRepository : CrudRepository<OrderEntity, Long> {
     fun findByStatus(status: OrderStatus): List<OrderEntity>
 
-    fun findByCustomerId(customerId: UUID): List<OrderEntity>
+    fun findByCustomerId(customerId: String): List<OrderEntity>
 
-    fun findByCustomerIdAndStatus(customerId: UUID, status: OrderStatus): List<OrderEntity>
+    fun findByStatusAndCustomerId(status: OrderStatus, customerId: String): List<OrderEntity>
 
     fun findAllByStatusInOrderByStatusDescNumberAsc(status: Set<OrderStatus>): List<OrderEntity>
 }

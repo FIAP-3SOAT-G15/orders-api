@@ -1,4 +1,4 @@
-package com.fiap.order.adapter.controller.configuration
+package com.fiap.order.adapter.controller.config
 
 import com.fiap.order.OrderApiApp
 import com.fiap.order.adapter.gateway.CustomerGateway

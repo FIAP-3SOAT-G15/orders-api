@@ -2,7 +2,7 @@ package com.fiap.order.adapter.controller
 
 import com.fiap.order.domain.entities.Order
 import com.fiap.order.domain.valueobjects.OrderStatus
-import com.fiap.order.driver.web.OrdersAPI
+import com.fiap.order.driver.web.OrderAPI
 import com.fiap.order.driver.web.request.OrderRequest
 import com.fiap.order.driver.web.response.PendingOrderResponse
 import com.fiap.order.usecases.ChangeOrderStatusUseCase
@@ -20,7 +20,7 @@ class OrderController(
     private val loadOrderUseCase: LoadOrderUseCase,
     private val createOrderUseCase: CreateOrderUseCase,
     private val changeOrderStatusUseCase: ChangeOrderStatusUseCase,
-) : OrdersAPI
+) : OrderAPI
 {
     private val log = LoggerFactory.getLogger(javaClass)
 
