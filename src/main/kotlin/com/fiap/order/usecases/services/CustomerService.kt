@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 class CustomerService(
-    private val repository: CustomerGateway,
+    private val customerGateway: CustomerGateway,
 ) : LoadCustomerUseCase,
     SearchCustomerUseCase,
     CreateCustomerUseCase,
@@ -22,8 +22,8 @@ class CustomerService(
 {
     private val log = LoggerFactory.getLogger(javaClass)
     
-    override fun getById(customerId: UUID): Customer {
-        return repository.findById(customerId)
+    override fun getByCustomerId(customerId: UUID): Customer {
+        return customerGateway.findById(customerId)
             ?: throw SelfOrderManagementException(
                 errorType = ErrorType.CUSTOMER_NOT_FOUND,
                 message = "Customer [$customerId] not found",
@@ -31,33 +31,29 @@ class CustomerService(
     }
 
     override fun findAll(): List<Customer> {
-        return repository.findAll()
+        return customerGateway.findAll()
     }
 
-    override fun findById(customerId: UUID): Customer? {
-        return repository.findById(customerId)
+    override fun findByCustomerId(customerId: UUID): Customer? {
+        return customerGateway.findById(customerId)
     }
 
     override fun searchByName(name: String): List<Customer> {
-        return repository.searchByName(name.trim())
-    }
-
-    override fun searchByEmail(email: String): Customer? {
-        return repository.searchByEmail(email.trim())
+        return customerGateway.searchByName(name.trim())
     }
 
     override fun create(customer: Customer): Customer {
         log.info("Creating customer $customer")
-        return repository.create(customer.copy(id = UUID.randomUUID()))
+        return customerGateway.create(customer.copy(id = UUID.randomUUID()))
     }
 
     override fun update(customer: Customer): Customer {
         log.info("Updating customer $customer")
-        return repository.update(customer)
+        return customerGateway.update(customer)
     }
 
     override fun remove(customerId: UUID): Customer {
         log.info("Removing customer [$customerId]")
-        return repository.deleteById(customerId)
+        return customerGateway.deleteById(customerId)
     }
 }

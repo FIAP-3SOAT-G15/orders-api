@@ -17,10 +17,13 @@
         <java.version>17</java.version>
         <kotlin.version>1.8.22</kotlin.version>
         <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
+
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <testcontainers.version>1.19.1</testcontainers.version>
+        
         <skipITs>true</skipITs>
         <skipOpenAPIGen>true</skipOpenAPIGen>
+        
         <sonar.organization>fiap-3soat-g15</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -375,6 +378,12 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.12</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*Config.*</exclude>
+                        <exclude>**/*Mapper.*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>

@@ -1,4 +1,4 @@
-package com.fiap.order.application.services
+package com.fiap.order.usecases.services
 
 import com.fiap.order.adapter.gateway.OrderGateway
 import com.fiap.order.adapter.gateway.impl.TransactionalGatewayImpl
@@ -10,16 +10,17 @@ import com.fiap.order.usecases.AdjustStockUseCase
 import com.fiap.order.usecases.LoadCustomerUseCase
 import com.fiap.order.usecases.LoadProductUseCase
 import com.fiap.order.usecases.RequestPaymentUseCase
-import com.fiap.order.usecases.services.OrderService
-import createCustomer
-import createOrder
-import createOrderItem
-import createPaymentResponse
-import createProduct
-import createStock
+import com.fiap.order.createCustomer
+import com.fiap.order.createOrder
+import com.fiap.order.createOrderItem
+import com.fiap.order.createPaymentResponse
+import com.fiap.order.createProduct
+import com.fiap.order.createStock
+import com.fiap.order.domain.valueobjects.PaymentStatus
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
+import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
+import java.util.*
 
 class OrderServiceTest {
     private val orderRepository = mockk<OrderGateway>()
@@ -50,7 +52,7 @@ class OrderServiceTest {
 
     @BeforeEach
     fun setUp() {
-        every { getCustomersUseCase.getById(any()) } returns createCustomer()
+        every { getCustomersUseCase.getByCustomerId(any()) } returns createCustomer()
         every { getProductUseCase.getByProductNumber(any()) } returns createProduct()
         every { requestPaymentUseCase.requestPayment(any()) } returns createPaymentResponse()
     }
@@ -61,9 +63,9 @@ class OrderServiceTest {
     }
 
     @Nested
-    inner class GetByOrderNumberTest {
+    inner class GetByOrderNumber {
         @Test
-        fun `should find existent order`() {
+        fun `should return existent order`() {
             val order = createOrder()
 
             every { orderRepository.findByOrderNumber(order.number!!) } returns order
@@ -74,7 +76,7 @@ class OrderServiceTest {
         }
 
         @Test
-        fun `should not find non-existent order`() {
+        fun `should throw an error when trying to get non-existent order`() {
             val orderNumber = 1L
 
             every { orderRepository.findByOrderNumber(orderNumber) } returns null
@@ -84,11 +86,79 @@ class OrderServiceTest {
                 .hasFieldOrPropertyWithValue("errorType", ErrorType.ORDER_NOT_FOUND)
         }
     }
+    
+    @Test
+    fun `should find all orders`() {
+        val orders = listOf(createOrder())
+        
+        every { orderRepository.findAll() } returns orders
+        
+        val result = orderService.findAll()
+        
+        assertThat(result).containsExactlyInAnyOrderElementsOf(orders)
+        verify { orderRepository.findAll() }
+    }
+
+    @Test
+    fun `should find all active orders`() {
+        val orders = listOf(
+            createOrder(number = 1, status = OrderStatus.CONFIRMED),
+            createOrder(number = 2, status = OrderStatus.PREPARING),
+            createOrder(number = 3, status = OrderStatus.COMPLETED),
+        )
+
+        every { orderRepository.findAllActive() } returns orders
+
+        val result = orderService.findAllActive()
+
+        assertThat(result).containsExactlyInAnyOrderElementsOf(orders)
+        verify { orderRepository.findAllActive() }
+    }
+    
+    @Test
+    fun `should find orders by status`() {
+        val orders = listOf(createOrder(status = OrderStatus.PENDING))
+        val orderStatus = OrderStatus.PENDING
+
+        every { orderRepository.findByStatus(orderStatus) } returns orders
+
+        val result = orderService.findByStatus(orderStatus)
+
+        assertThat(result).containsExactlyInAnyOrderElementsOf(orders)
+        verify { orderRepository.findByStatus(orderStatus) }
+    }
+
+    @Test
+    fun `should find orders by status and customer ID`() {
+        val orderStatus = OrderStatus.PENDING
+        val customerId = UUID.randomUUID()
+        val orders = listOf(createOrder(status = orderStatus, customer = createCustomer(id = customerId)))
+
+        every { orderRepository.findByStatusAndCustomerId(orderStatus, customerId) } returns orders
+
+        val result = orderService.findByStatusAndCustomerId(orderStatus, customerId)
+
+        assertThat(result).containsExactlyInAnyOrderElementsOf(orders)
+        verify { orderRepository.findByStatusAndCustomerId(orderStatus, customerId) }
+    }
+
+    @Test
+    fun `should find orders by customer ID`() {
+        val customerId = UUID.randomUUID()
+        val orders = listOf(createOrder(customer = createCustomer(id = customerId)))
+
+        every { orderRepository.findByCustomerId(customerId) } returns orders
+
+        val result = orderService.findByCustomerId(customerId)
+
+        assertThat(result).containsExactlyInAnyOrderElementsOf(orders)
+        verify { orderRepository.findByCustomerId(customerId) }
+    }
 
     @Nested
-    inner class CreateTest {
+    inner class CreateOrder {
         @Test
-        fun `create create order`() {
+        fun `should create order`() {
             val items = listOf(createOrderItem())
 
             every { adjustInventoryUseCase.decrement(any(), any()) } returns createStock()
@@ -103,7 +173,7 @@ class OrderServiceTest {
         }
 
         @Test
-        fun `create should throw an exception when items are empty`() {
+        fun `should throw an error when order is empty`() {
             val items = emptyList<OrderItem>()
 
             assertThatThrownBy { orderService.create(null, items) }
@@ -113,9 +183,9 @@ class OrderServiceTest {
     }
 
     @Nested
-    inner class ConfirmOrderTest {
+    inner class ConfirmOrder {
         @Test
-        fun `should confirm a pending order with a confirmed payment`() {
+        fun `should confirm a order with pending status`() {
             val order = createOrder(status = OrderStatus.PENDING)
 
             every { orderRepository.findByOrderNumber(any()) } returns order
@@ -128,8 +198,8 @@ class OrderServiceTest {
         }
 
         @ParameterizedTest
-        @EnumSource(OrderStatus::class, names = ["CREATED", "CONFIRMED", "PREPARING", "COMPLETED", "DONE", "CANCELLED"])
-        fun `should not confirm an order which is not pending`(orderStatus: OrderStatus) {
+        @EnumSource(OrderStatus::class, names = ["PENDING"], mode = EnumSource.Mode.EXCLUDE)
+        fun `should not confirm an order when status is not pending`(orderStatus: OrderStatus) {
             val order = createOrder(status = orderStatus)
 
             every { orderRepository.findByOrderNumber(any()) } returns order
@@ -142,9 +212,9 @@ class OrderServiceTest {
     }
 
     @Nested
-    inner class StartOrderPreparationTest {
+    inner class StartOrderPreparation {
         @Test
-        fun `startOrderPreparation should start preparation for a CONFIRMED order`() {
+        fun `should start preparation of an order`() {
             val order = createOrder(status = OrderStatus.CONFIRMED)
 
             every { orderRepository.findByOrderNumber(any()) } returns order
@@ -157,7 +227,7 @@ class OrderServiceTest {
         }
 
         @Test
-        fun `startOrderPreparation should throw an exception for a non-CONFIRMED order`() {
+        fun `should throw an error when trying to start preparation of an not confirmed order`() {
             val order = createOrder(status = OrderStatus.CREATED)
 
             every { orderRepository.findByOrderNumber(any()) } returns order
@@ -169,9 +239,9 @@ class OrderServiceTest {
     }
 
     @Nested
-    inner class FinishOrderPreparationTest {
+    inner class FinishOrderPreparation {
         @Test
-        fun `finishOrderPreparation should finish a COMPLETED order when it is delivered`() {
+        fun `should finish preparation of an order`() {
             val order = createOrder(status = OrderStatus.COMPLETED)
 
             every { orderRepository.findByOrderNumber(any()) } returns order
@@ -184,7 +254,7 @@ class OrderServiceTest {
         }
 
         @Test
-        fun `finishOrderPreparation should throw an exception for a non-PREPARING order`() {
+        fun `should throw an error when trying to finish preparation of an order not being prepared`() {
             val order = createOrder(status = OrderStatus.CREATED)
 
             every { orderRepository.findByOrderNumber(any()) } returns order
@@ -196,9 +266,9 @@ class OrderServiceTest {
     }
 
     @Nested
-    inner class CompleteOrderTest {
+    inner class CompleteOrder {
         @Test
-        fun `completeOrder should complete an order that is not yet completed (status is not DONE)`() {
+        fun `should complete an order`() {
             val order = createOrder(status = OrderStatus.PREPARING)
 
             every { orderRepository.findByOrderNumber(any()) } returns order
@@ -211,7 +281,7 @@ class OrderServiceTest {
         }
 
         @Test
-        fun `completeOrder should throw an exception for an already completed order (status is DONE)`() {
+        fun `should throw an error when trying to complete an order already completed`() {
             val order = createOrder(status = OrderStatus.DONE)
 
             every { orderRepository.findByOrderNumber(any()) } returns order
@@ -224,9 +294,9 @@ class OrderServiceTest {
     }
 
     @Nested
-    inner class CancelOrderTest {
+    inner class CancelOrder {
         @Test
-        fun `cancelOrder should cancel a CREATED order and make reserved products available`() {
+        fun `should cancel a created order making reserved products available`() {
             val order = createOrder(status = OrderStatus.CREATED)
 
             every { orderRepository.findByOrderNumber(any()) } returns order
@@ -240,7 +310,7 @@ class OrderServiceTest {
         }
 
         @Test
-        fun `cancelOrder should cancel a CONFIRMED order and make reserved products available`() {
+        fun `should cancel a confirmed order making reserved products available`() {
             val order = createOrder(status = OrderStatus.CONFIRMED)
 
             every { orderRepository.findByOrderNumber(any()) } returns order
@@ -254,7 +324,7 @@ class OrderServiceTest {
         }
 
         @Test
-        fun `cancelOrder should throw an exception for a COMPLETED order`() {
+        fun `should throw an error when trying to cancel an order already completed`() {
             val order = createOrder(status = OrderStatus.COMPLETED)
 
             every { orderRepository.findByOrderNumber(any()) } returns order

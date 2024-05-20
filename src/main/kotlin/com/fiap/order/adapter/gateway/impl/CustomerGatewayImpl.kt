@@ -10,31 +10,21 @@ import org.mapstruct.factory.Mappers
 import java.util.*
 
 class CustomerGatewayImpl(
-    private val customerJpaRepository: CustomerJpaRepository,
+    private val customerRepository: CustomerJpaRepository,
 ) : CustomerGateway {
     private val mapper: CustomerMapper = Mappers.getMapper(CustomerMapper::class.java)
 
-    override fun findAll(): List<Customer> {
-        return customerJpaRepository.findAll()
-            .map(mapper::toDomain)
-    }
+    override fun findAll(): List<Customer> =
+        customerRepository.findAll().map(mapper::toDomain)
 
-    override fun findById(customerId: UUID): Customer? {
-        return customerJpaRepository.findById(customerId.toString())
-            .map(mapper::toDomain)
-            .orElse(null)
-    }
+    override fun findById(customerId: UUID): Customer? =
+        customerRepository.findById(customerId.toString()).map(mapper::toDomain).orElse(null)
 
-    override fun searchByName(name: String): List<Customer> {
-        return customerJpaRepository.findByNameContainingIgnoreCase(name)
-            .map(mapper::toDomain)
-    }
+    override fun searchByName(name: String): List<Customer> =
+        customerRepository.findByNameContainingIgnoreCase(name).map(mapper::toDomain)
 
-    override fun searchByEmail(email: String): Customer? {
-        return customerJpaRepository.findByEmail(email)
-            .map(mapper::toDomain)
-            .orElse(null)
-    }
+    override fun searchByEmail(email: String): Customer? =
+        customerRepository.findByEmail(email).map(mapper::toDomain).orElse(null)
 
     override fun create(customer: Customer): Customer {
         customer.email
@@ -58,11 +48,8 @@ class CustomerGatewayImpl(
         return persist(customer)
     }
 
-    override fun searchByDocument(document: String): Customer? {
-        return customerJpaRepository.findByDocument(document)
-            .map(mapper::toDomain)
-            .orElse(null)
-    }
+    override fun searchByDocument(document: String): Customer? =
+        customerRepository.findByDocument(document).map(mapper::toDomain).orElse(null)
 
     override fun update(customer: Customer): Customer {
         val newItem =
@@ -78,7 +65,7 @@ class CustomerGatewayImpl(
     override fun deleteById(customerId: UUID): Customer {
         return findById(customerId)
             ?.let {
-                customerJpaRepository.deleteById(customerId.toString())
+                customerRepository.deleteById(customerId.toString())
                 it
             }
             ?: throw SelfOrderManagementException(
@@ -88,12 +75,12 @@ class CustomerGatewayImpl(
     }
 
     override fun deleteAll() {
-        customerJpaRepository.deleteAll()
+        customerRepository.deleteAll()
     }
 
     private fun persist(customer: Customer): Customer =
         customer
             .let(mapper::toEntity)
-            .let(customerJpaRepository::save)
+            .let(customerRepository::save)
             .let(mapper::toDomain)
 }

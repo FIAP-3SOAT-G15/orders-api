@@ -10,21 +10,22 @@ import java.util.*
 
 @RestController
 class CustomerController(
-    private val loadCustomersUseCase: LoadCustomerUseCase,
+    private val loadCustomerUseCase: LoadCustomerUseCase,
     private val searchCustomerUseCase: SearchCustomerUseCase,
     private val createCustomerUseCase: CreateCustomerUseCase,
     private val updateCustomerUseCase: UpdateCustomerUseCase,
     private val removeCustomerUseCase: RemoveCustomerUseCase,
-) : CustomersAPI {
+) : CustomersAPI
+{
     override fun getById(customerId: String): ResponseEntity<Customer?> {
         customerId
             .runCatching { UUID.fromString(this) }
             .getOrElse { return ResponseEntity.notFound().build() }
-            .run { return ResponseEntity.ok(loadCustomersUseCase.getById(this)) }
+            .run { return ResponseEntity.ok(loadCustomerUseCase.getByCustomerId(this)) }
     }
 
     override fun findAll(): ResponseEntity<List<Customer>> {
-        return ResponseEntity.ok(loadCustomersUseCase.findAll())
+        return ResponseEntity.ok(loadCustomerUseCase.findAll())
     }
 
     override fun searchByName(name: String): ResponseEntity<List<Customer>> {

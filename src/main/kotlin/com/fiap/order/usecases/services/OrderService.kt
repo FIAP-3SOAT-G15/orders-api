@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 open class OrderService(
-    private val orderRepository: OrderGateway,
+    private val orderGateway: OrderGateway,
     private val getCustomersUseCase: LoadCustomerUseCase,
     private val loadProductUseCase: LoadProductUseCase,
     private val adjustInventoryUseCase: AdjustStockUseCase,
@@ -32,29 +32,27 @@ open class OrderService(
 {
     private val log = LoggerFactory.getLogger(javaClass)
     
-    override fun getByOrderNumber(orderNumber: Long): Order {
-        return orderRepository.findByOrderNumber(orderNumber)
+    override fun getByOrderNumber(orderNumber: Long): Order =
+        orderGateway.findByOrderNumber(orderNumber)
             ?: throw SelfOrderManagementException(
                 errorType = ErrorType.ORDER_NOT_FOUND,
                 message = "Order [$orderNumber] not found",
             )
-    }
 
-    override fun findAll(): List<Order> {
-        return orderRepository.findAllActiveOrders()
-    }
+    override fun findAll(): List<Order> =
+        orderGateway.findAll()
 
-    override fun findByStatus(status: OrderStatus): List<Order> {
-        return orderRepository.findByStatus(status)
-    }
+    override fun findAllActive(): List<Order> =
+        orderGateway.findAllActive()
 
-    override fun findByCustomerId(customerId: UUID): List<Order> {
-        return orderRepository.findByCustomerId(customerId)
-    }
+    override fun findByStatus(status: OrderStatus): List<Order> =
+        orderGateway.findByStatus(status)
 
-    override fun findByCustomerIdAndStatus(customerId: UUID, status: OrderStatus): List<Order> {
-        return orderRepository.findByCustomerIdAndStatus(customerId, status)
-    }
+    override fun findByCustomerId(customerId: UUID): List<Order> =
+        orderGateway.findByCustomerId(customerId)
+
+    override fun findByStatusAndCustomerId(status: OrderStatus, customerId: UUID): List<Order> =
+        orderGateway.findByStatusAndCustomerId(status, customerId)
 
     override fun create(
         customerId: UUID?,
@@ -80,11 +78,11 @@ open class OrderService(
                     MutableList(it.quantity.toInt()) { product }
                 }
 
-            var order = orderRepository.upsert(
+            var order = orderGateway.upsert(
                 Order(
                     number = null,
                     orderedAt = LocalDateTime.now(),
-                    customer = customerId?.let { getCustomersUseCase.findById(customerId) },
+                    customer = customerId?.let { getCustomersUseCase.findByCustomerId(customerId) },
                     status = OrderStatus.CREATED,
                     items = products,
                     total = products.sumOf { it.price },
@@ -93,7 +91,7 @@ open class OrderService(
 
             val payment = providePaymentRequestUseCase.requestPayment(order)
 
-            order = orderRepository.upsert(
+            order = orderGateway.upsert(
                 order.copy(
                     status = OrderStatus.PENDING,
                     items = order.items.map { i -> i.copy(orderNumber = order.number) },
@@ -115,7 +113,7 @@ open class OrderService(
             when (order.status) {
                 OrderStatus.PENDING -> {
                     log.info("Confirming order $order")
-                    orderRepository.upsert(order.copy(status = OrderStatus.CONFIRMED))
+                    orderGateway.upsert(order.copy(status = OrderStatus.CONFIRMED))
                 }
                 else -> {
                     throw SelfOrderManagementException(
@@ -132,7 +130,7 @@ open class OrderService(
             .takeIf { it.status == OrderStatus.CONFIRMED }
             ?.let { order ->
                 log.info("Starting preparation of order $order")
-                orderRepository.upsert(order.copy(status = OrderStatus.PREPARING))
+                orderGateway.upsert(order.copy(status = OrderStatus.PREPARING))
             }
             ?: throw SelfOrderManagementException(
                 errorType = ErrorType.INVALID_ORDER_STATE_TRANSITION,
@@ -145,7 +143,7 @@ open class OrderService(
             .takeIf { it.status == OrderStatus.PREPARING }
             ?.let { order ->
                 log.info("Completing order $order")
-                orderRepository.upsert(order.copy(status = OrderStatus.COMPLETED))
+                orderGateway.upsert(order.copy(status = OrderStatus.COMPLETED))
             }
             ?: throw SelfOrderManagementException(
                 errorType = ErrorType.INVALID_ORDER_STATE_TRANSITION,
@@ -158,7 +156,7 @@ open class OrderService(
             .takeIf { it.status == OrderStatus.COMPLETED }
             ?.let { order ->
                 log.info("Finishing preparation of order $order")
-                orderRepository.upsert(order.copy(status = OrderStatus.DONE))
+                orderGateway.upsert(order.copy(status = OrderStatus.DONE))
             }
             ?: throw SelfOrderManagementException(
                 errorType = ErrorType.INVALID_ORDER_STATE_TRANSITION,
@@ -178,7 +176,7 @@ open class OrderService(
                             it.number?.let { number -> adjustInventoryUseCase.increment(number, 1) }
                         }
                     }
-                    orderRepository.upsert(order.copy(status = OrderStatus.CANCELLED))
+                    orderGateway.upsert(order.copy(status = OrderStatus.CANCELLED))
                 }
                 ?: throw SelfOrderManagementException(
                     errorType = ErrorType.INVALID_ORDER_STATE_TRANSITION,

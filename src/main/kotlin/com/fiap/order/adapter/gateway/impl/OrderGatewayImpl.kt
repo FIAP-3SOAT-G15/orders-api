@@ -9,12 +9,15 @@ import org.mapstruct.factory.Mappers
 import java.util.*
 
 class OrderGatewayImpl(
-    private val orderJpaRepository: OrderJpaRepository,
+    private val orderRepository: OrderJpaRepository,
 ) : OrderGateway {
     private val mapper = Mappers.getMapper(OrderMapper::class.java)
 
-    override fun findAllActiveOrders(): List<Order> {
-        return orderJpaRepository
+    override fun findAll(): List<Order> = 
+        orderRepository.findAll().map(mapper::toDomain)
+    
+    override fun findAllActive(): List<Order>
+        = orderRepository
             .findAllByStatusInOrderByStatusDescNumberAsc(
                 setOf(
                     OrderStatus.CONFIRMED,
@@ -23,31 +26,18 @@ class OrderGatewayImpl(
                 ),
             )
             .map(mapper::toDomain)
-    }
 
-    override fun findByOrderNumber(number: Long): Order? {
-        return orderJpaRepository.findById(number)
-            .map(mapper::toDomain)
-            .orElse(null)
-    }
+    override fun findByOrderNumber(number: Long): Order? =
+        orderRepository.findById(number).map(mapper::toDomain).orElse(null)
 
-    override fun findByStatus(status: OrderStatus): List<Order> {
-        return orderJpaRepository.findByStatus(status)
-            .map(mapper::toDomain)
-    }
+    override fun findByStatus(status: OrderStatus): List<Order> =
+        orderRepository.findByStatus(status).map(mapper::toDomain)
 
-    override fun findByCustomerId(customerId: UUID): List<Order> {
-        return orderJpaRepository.findByCustomerId(customerId)
-            .map(mapper::toDomain)
-    }
-
-    override fun findByCustomerIdAndStatus(
-        customerId: UUID,
-        status: OrderStatus,
-    ): List<Order> {
-        return orderJpaRepository.findByCustomerIdAndStatus(customerId, status)
-            .map(mapper::toDomain)
-    }
+    override fun findByStatusAndCustomerId(status: OrderStatus, customerId: UUID): List<Order> =
+        orderRepository.findByCustomerIdAndStatus(customerId, status).map(mapper::toDomain)
+    
+    override fun findByCustomerId(customerId: UUID): List<Order> =
+        orderRepository.findByCustomerId(customerId).map(mapper::toDomain)
 
     override fun upsert(order: Order): Order {
         val currentOrder = order.number?.let { findByOrderNumber(number = order.number) } 
@@ -65,12 +55,12 @@ class OrderGatewayImpl(
     }
 
     override fun deleteAll() {
-        orderJpaRepository.deleteAll()
+        orderRepository.deleteAll()
     }
     
     private fun persist(order: Order): Order =
         order
             .let(mapper::toEntity)
-            .let(orderJpaRepository::save)
+            .let(orderRepository::save)
             .let(mapper::toDomain)
 }

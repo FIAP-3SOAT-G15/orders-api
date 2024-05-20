@@ -41,5 +41,4 @@ interface StockApiClient {
         consumes = ["application/json"]
     )
     fun getByProductNumber(@PathVariable("productNumber") productNumber: Long): Product
-
 }
