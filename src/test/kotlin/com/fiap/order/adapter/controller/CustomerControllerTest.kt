@@ -44,7 +44,7 @@ class CustomerControllerTest {
         
         every { loadCustomerUseCase.getByCustomerId(customerId) } returns customer
         
-        val result = customerController.getById(customerId.toString())
+        val result = customerController.getByCustomerId(customerId.toString())
         
         assertThat(result.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(result.body).isEqualTo(customer)

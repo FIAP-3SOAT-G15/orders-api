@@ -9,6 +9,6 @@ data class Order(
     val orderedAt: LocalDateTime = LocalDateTime.now(),
     val customer: Customer? = null,
     val status: OrderStatus = OrderStatus.CREATED,
-    val items: List<Product>,
+    val lines: List<OrderLine>,
     val total: BigDecimal,
 )

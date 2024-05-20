@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS customer
     customer_email VARCHAR(255),
     customer_phone VARCHAR(255),
     customer_address VARCHAR(1000)
-    );
+);
 
 CREATE TABLE IF NOT EXISTS "order"
 (
@@ -18,15 +18,15 @@ CREATE TABLE IF NOT EXISTS "order"
     CONSTRAINT fk_order_customer_id FOREIGN KEY(order_customer_id) REFERENCES customer(customer_id)
 );
 
-CREATE TABLE IF NOT EXISTS product
+CREATE TABLE IF NOT EXISTS order_line
 (
-    product_number SERIAL NOT NULL PRIMARY KEY,
-    product_order_number INTEGER NOT NULL,
-    product_name VARCHAR(255) NOT NULL,
-    product_category VARCHAR(255) NOT NULL,
-    product_price NUMERIC(15,2) NOT NULL,
-    product_description VARCHAR(255),
-    product_min_sub_item INTEGER,
-    product_max_sub_item INTEGER,
-    CONSTRAINT fk_product_order_number FOREIGN KEY(product_order_number) REFERENCES "order"(order_number) ON DELETE CASCADE
+    order_line_number SERIAL NOT NULL PRIMARY KEY,
+    order_line_order_number INTEGER NOT NULL,
+    order_line_product_number INTEGER NOT NULL,
+    order_line_name VARCHAR(255) NOT NULL,
+    order_line_description VARCHAR(255) NOT NULL,
+    order_line_unit_price NUMERIC(15,2) NOT NULL,
+    order_line_quantity INTEGER,
+    order_line_total NUMERIC(15,2) NOT NULL,
+    CONSTRAINT fk_order_line_order_number FOREIGN KEY(order_line_order_number) REFERENCES "order"(order_number) ON DELETE CASCADE
 );

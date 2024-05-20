@@ -17,40 +17,35 @@ class CustomerController(
     private val removeCustomerUseCase: RemoveCustomerUseCase,
 ) : CustomerAPI
 {
-    override fun getById(customerId: String): ResponseEntity<Customer?> {
+    override fun getByCustomerId(customerId: String): ResponseEntity<Customer?> {
         customerId
             .runCatching { UUID.fromString(this) }
             .getOrElse { return ResponseEntity.notFound().build() }
             .run { return ResponseEntity.ok(loadCustomerUseCase.getByCustomerId(this)) }
     }
 
-    override fun findAll(): ResponseEntity<List<Customer>> {
-        return ResponseEntity.ok(loadCustomerUseCase.findAll())
-    }
+    override fun findAll(): ResponseEntity<List<Customer>> =
+        ResponseEntity.ok(loadCustomerUseCase.findAll())
 
-    override fun searchByName(name: String): ResponseEntity<List<Customer>> {
-        return ResponseEntity.ok(searchCustomerUseCase.searchByName(name))
-    }
+    override fun searchByName(name: String): ResponseEntity<List<Customer>> =
+        ResponseEntity.ok(searchCustomerUseCase.searchByName(name))
 
-    override fun create(customerRequest: CustomerRequest): ResponseEntity<Customer> {
-        return ResponseEntity.ok(createCustomerUseCase.create(customerRequest.toDomain()))
-    }
+    override fun create(customerRequest: CustomerRequest): ResponseEntity<Customer> =
+        ResponseEntity.ok(createCustomerUseCase.create(customerRequest.toDomain()))
 
     override fun update(
         customerId: String,
         customerRequest: CustomerRequest,
-    ): ResponseEntity<Customer> {
+    ): ResponseEntity<Customer> =
         customerId
             .runCatching { UUID.fromString(customerId) }
             .getOrElse { return ResponseEntity.notFound().build() }
             .let { customerRequest.toDomain().copy(id = it) }
             .run { return ResponseEntity.ok(updateCustomerUseCase.update(this)) }
-    }
 
-    override fun remove(customerId: String): ResponseEntity<Customer> {
+    override fun remove(customerId: String): ResponseEntity<Customer> =
         customerId
             .runCatching { UUID.fromString(this) }
             .getOrElse { return ResponseEntity.notFound().build() }
             .run { return ResponseEntity.ok(removeCustomerUseCase.remove(this)) }
-    }
 }

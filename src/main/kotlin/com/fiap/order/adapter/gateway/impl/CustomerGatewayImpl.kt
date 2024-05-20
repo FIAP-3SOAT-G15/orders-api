@@ -20,15 +20,18 @@ class CustomerGatewayImpl(
     override fun findById(customerId: UUID): Customer? =
         customerRepository.findById(customerId.toString()).map(mapper::toDomain).orElse(null)
 
+    override fun findByEmail(email: String): Customer? =
+        customerRepository.findByEmail(email).map(mapper::toDomain).orElse(null)
+
+    override fun findByDocument(document: String): Customer? =
+        customerRepository.findByDocument(document).map(mapper::toDomain).orElse(null)
+    
     override fun searchByName(name: String): List<Customer> =
         customerRepository.findByNameContainingIgnoreCase(name).map(mapper::toDomain)
 
-    override fun searchByEmail(email: String): Customer? =
-        customerRepository.findByEmail(email).map(mapper::toDomain).orElse(null)
-
     override fun create(customer: Customer): Customer {
         customer.email
-            ?.let { searchByEmail(it) }
+            ?.let { findByEmail(it) }
             ?.let {
                 throw SelfOrderManagementException(
                     errorType = ErrorType.CUSTOMER_ALREADY_EXISTS,
@@ -37,7 +40,7 @@ class CustomerGatewayImpl(
             }
 
         customer.document
-            ?.let { searchByDocument(it) }
+            ?.let { findByDocument(it) }
             ?.let {
                 throw SelfOrderManagementException(
                     errorType = ErrorType.CUSTOMER_ALREADY_EXISTS,
@@ -47,9 +50,6 @@ class CustomerGatewayImpl(
 
         return persist(customer)
     }
-
-    override fun searchByDocument(document: String): Customer? =
-        customerRepository.findByDocument(document).map(mapper::toDomain).orElse(null)
 
     override fun update(customer: Customer): Customer {
         val newItem =

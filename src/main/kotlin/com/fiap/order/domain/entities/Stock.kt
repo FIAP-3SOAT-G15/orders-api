@@ -8,6 +8,4 @@ data class Stock(
         copy(
             quantity = newStock.quantity,
         )
-
-    fun hasSufficientInventory(quantity: Long) = quantity >= this.quantity
 }

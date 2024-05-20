@@ -10,9 +10,9 @@ interface CustomerGateway {
 
     fun searchByName(name: String): List<Customer>
 
-    fun searchByEmail(email: String): Customer?
+    fun findByEmail(email: String): Customer?
 
-    fun searchByDocument(document: String): Customer?
+    fun findByDocument(document: String): Customer?
 
     fun create(customer: Customer): Customer
 

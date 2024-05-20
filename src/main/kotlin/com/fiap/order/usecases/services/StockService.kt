@@ -11,13 +11,13 @@ class StockService(
 {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    override fun increment(componentNumber: Long, quantity: Long): Stock {
-        log.info("Requesting stock of product component [$componentNumber] to be incremented")
-        return stockGateway.increment(componentNumber, quantity)
+    override fun incrementStockOfProducts(productQuantityMap: Map<Long, Long>) {
+        log.info("Requesting increment of stock for product-quantity map: $productQuantityMap")
+        stockGateway.increment(productQuantityMap)
     }
 
-    override fun decrement(componentNumber: Long, quantity: Long): Stock {
-        log.info("Requesting stock of product component [$componentNumber] to be decremented")
-        return  stockGateway.decrement(componentNumber, quantity)
+    override fun decrementStockOfProducts(productQuantityMap: Map<Long, Long>) {
+        log.info("Requesting decrement of stock for product-quantity map: $productQuantityMap")
+        stockGateway.decrement(productQuantityMap)
     }
 }

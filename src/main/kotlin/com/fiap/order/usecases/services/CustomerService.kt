@@ -34,6 +34,10 @@ class CustomerService(
         return customerGateway.findAll()
     }
 
+    override fun findByEmail(email: String): Customer? {
+        return customerGateway.findByEmail(email)
+    }
+
     override fun findByCustomerId(customerId: UUID): Customer? {
         return customerGateway.findById(customerId)
     }

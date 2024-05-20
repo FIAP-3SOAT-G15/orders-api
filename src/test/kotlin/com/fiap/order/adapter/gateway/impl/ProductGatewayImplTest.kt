@@ -25,12 +25,13 @@ class ProductGatewayImplTest {
     @Test
     fun `should find product by number`() {
         val productNumber = 1L
-        val product = createProduct(number = productNumber)
+        val productNumbers = listOf(productNumber)
+        val products = listOf(createProduct(number = productNumber))
         
-        every { stockApiClient.getByProductNumber(productNumber) } returns product
+        every { stockApiClient.getByProductNumbers(productNumbers) } returns products
         
-        val result = productGatewayImpl.findByProductNumber(productNumber)
+        val result = productGatewayImpl.findByProductNumbers(productNumbers)
         
-        assertThat(result).isEqualTo(product)
+        assertThat(result).isEqualTo(products)
     }
 }

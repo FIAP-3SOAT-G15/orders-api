@@ -9,4 +9,6 @@ interface LoadCustomerUseCase {
     fun findAll(): List<Customer>
     
     fun findByCustomerId(customerId: UUID): Customer?
+    
+    fun findByEmail(email: String): Customer?
 }

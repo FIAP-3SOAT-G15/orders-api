@@ -4,6 +4,7 @@ import com.fiap.order.adapter.gateway.OrderGateway
 import com.fiap.order.adapter.gateway.TransactionalGateway
 import com.fiap.order.domain.entities.Order
 import com.fiap.order.domain.entities.OrderItem
+import com.fiap.order.domain.entities.OrderLine
 import com.fiap.order.domain.errors.ErrorType
 import com.fiap.order.domain.errors.SelfOrderManagementException
 import com.fiap.order.domain.valueobjects.OrderStatus
@@ -16,6 +17,7 @@ import com.fiap.order.usecases.LoadOrderUseCase
 import com.fiap.order.usecases.LoadProductUseCase
 import com.fiap.order.usecases.RequestPaymentUseCase
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
 
@@ -60,23 +62,30 @@ open class OrderService(
     ): PendingOrderResponse {
         return transactionalRepository.transaction {
             if (items.isEmpty()) {
-                throw SelfOrderManagementException(
-                    errorType = ErrorType.EMPTY_ORDER,
-                    message = "Empty order",
+                throw SelfOrderManagementException(errorType = ErrorType.EMPTY_ORDER, message = "Empty order")
+            }
+            
+            val productNumberQuantityMap = items.associate { it.productNumber to it.quantity }
+
+            // Verify existence of all products first
+            val products = loadProductUseCase.getByProductNumbers(productNumberQuantityMap.keys.toList())
+
+            // Reserve stock
+            adjustInventoryUseCase.decrementStockOfProducts(productNumberQuantityMap)
+
+            val orderLines = productNumberQuantityMap.map { (productNumber, quantity) ->
+                val product = products.first { it.number == productNumber }
+                OrderLine(
+                    number = null,
+                    orderNumber = null,
+                    productNumber = productNumber,
+                    name = product.name,
+                    description = product.description,
+                    unitPrice = product.price,
+                    quantity = quantity,
+                    total = BigDecimal.valueOf(quantity).multiply(product.price),
                 )
             }
-
-            // TODO: check for available stock in stock service
-            val products =
-                items.flatMap {
-                    val product = loadProductUseCase.getByProductNumber(it.productNumber)
-                    if (!product.isLogicalItem()!!) {
-                        product.components?.mapNotNull { p -> p.number }?.forEach { componentNumber ->
-                            adjustInventoryUseCase.decrement(componentNumber, it.quantity)
-                        }
-                    }
-                    MutableList(it.quantity.toInt()) { product }
-                }
 
             var order = orderGateway.upsert(
                 Order(
@@ -84,21 +93,21 @@ open class OrderService(
                     orderedAt = LocalDateTime.now(),
                     customer = customerId?.let { getCustomersUseCase.findByCustomerId(customerId) },
                     status = OrderStatus.CREATED,
-                    items = products,
-                    total = products.sumOf { it.price },
+                    lines = orderLines,
+                    total = orderLines.sumOf { it.total },
+                )
+            )
+
+            order = orderGateway.upsert(
+                order.copy(
+                    status = OrderStatus.PENDING,
+                    lines = order.lines.map { i -> i.copy(orderNumber = order.number) },
                 )
             )
 
             val payment = providePaymentRequestUseCase.requestPayment(order)
 
-            order = orderGateway.upsert(
-                order.copy(
-                    status = OrderStatus.PENDING,
-                    items = order.items.map { i -> i.copy(orderNumber = order.number) },
-                )
-            )
-
-            log.info("Stored order: $order")
+            log.info("Created order $order and respective payment $payment")
 
             PendingOrderResponse(
                 order = order,
@@ -171,10 +180,9 @@ open class OrderService(
                 ?.let { order ->
                     log.info("Cancelling order $order")
                     if (order.status == OrderStatus.CREATED || order.status == OrderStatus.CONFIRMED) {
-                        // in this case, make reserved products available again
-                        order.items.forEach {
-                            it.number?.let { number -> adjustInventoryUseCase.increment(number, 1) }
-                        }
+                        // make reserved stock available again
+                        val productNumberQuantityMap = order.lines.associate { it.productNumber to it.quantity }
+                        adjustInventoryUseCase.incrementStockOfProducts(productNumberQuantityMap)
                     }
                     orderGateway.upsert(order.copy(status = OrderStatus.CANCELLED))
                 }

@@ -20,5 +20,4 @@ class FeignConfig {
     fun stockApiInterceptor(): StockApiInterceptor{
         return StockApiInterceptor()
     }
-
 }
