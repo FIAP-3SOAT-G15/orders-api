@@ -31,12 +31,12 @@
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.language>kotlin</sonar.language>
         <sonar.verbose>true</sonar.verbose>
-        <sonar.coverage.exclusion>
+        <sonar.coverage.exclusions>
             **/com/fiap/order/driver/database/persistence/entities/**/*,
             **/com/fiap/order/**/config/**/*,
             **/com/fiap/order/driver/web/OrderAPI*.*,
             **/com/fiap/order/driver/web/CustomerAPI*.*
-        </sonar.coverage.exclusion>
+        </sonar.coverage.exclusions>
     </properties>
     <dependencies>
         <dependency>
