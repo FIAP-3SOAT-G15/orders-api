@@ -12,8 +12,8 @@ class PaymentService(
 {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    override fun requestPayment(order: Order): PaymentResponse {
+    override fun requestPayment(order: Order) {
         log.info("Requesting payment request for order $order")
-        return paymentGateway.requestPayment(order)
+        paymentGateway.notifyRequestPayment(order)
     }
 }

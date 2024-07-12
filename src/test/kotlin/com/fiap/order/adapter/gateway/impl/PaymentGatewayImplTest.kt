@@ -1,6 +1,7 @@
 package com.fiap.order.adapter.gateway.impl
 
 import com.fiap.order.adapter.client.PaymentsApiClient
+import com.fiap.order.adapter.messaging.sender.PaymentSender
 import com.fiap.order.createOrder
 import com.fiap.order.createPaymentResponse
 import io.mockk.every
@@ -13,10 +14,11 @@ import java.util.*
 
 class PaymentGatewayImplTest {
     private val paymentsApiClient = mockk<PaymentsApiClient>()
+    private val paymentSender = mockk<PaymentSender>()
 
     private val paymentGatewayImpl =
         PaymentGatewayImpl(
-            paymentsApiClient,
+            paymentsApiClient, paymentSender
         )
 
     @AfterEach

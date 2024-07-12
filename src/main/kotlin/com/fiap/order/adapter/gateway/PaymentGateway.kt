@@ -7,4 +7,6 @@ interface PaymentGateway {
     fun findByPaymentId(paymentId: String): PaymentResponse?
 
     fun requestPayment(order: Order): PaymentResponse
+
+    fun notifyRequestPayment(order: Order)
 }

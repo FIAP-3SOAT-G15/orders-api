@@ -165,7 +165,7 @@ class OrderServiceTest {
             justRun { adjustInventoryUseCase.decrementStockOfProducts(any()) }
             every { orderRepository.upsert(any()) } returns createOrder(status = OrderStatus.CREATED)
 
-            val result = orderService.create(null, items)
+            val result = orderService.requestCreate(null, items)
 
             assertThat(result).isNotNull()
             assertThat(result.order.number).isNotNull()
@@ -177,7 +177,7 @@ class OrderServiceTest {
         fun `should throw an error when order is empty`() {
             val items = emptyList<OrderItem>()
 
-            assertThatThrownBy { orderService.create(null, items) }
+            assertThatThrownBy { orderService.requestCreate(null, items) }
                 .isInstanceOf(SelfOrderManagementException::class.java)
                 .hasFieldOrPropertyWithValue("errorType", ErrorType.EMPTY_ORDER)
         }
