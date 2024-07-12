@@ -16,6 +16,7 @@ import com.fiap.order.driver.web.request.OrderItemRequest
 import com.fiap.order.driver.web.request.OrderRequest
 import com.fiap.order.driver.web.response.PaymentResponse
 import com.fiap.order.driver.web.response.PendingOrderResponse
+import com.fiap.order.driver.web.response.toDomain
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
@@ -187,5 +188,5 @@ fun createPendingOrderResponse(
     paymentResponse: PaymentResponse = createPaymentResponse(orderNumber = 1)
 ) = PendingOrderResponse(
     order = order,
-    payment = paymentResponse,
+    payment = paymentResponse.toDomain(),
 )

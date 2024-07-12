@@ -55,7 +55,7 @@ class OrderServiceTest {
     fun setUp() {
         every { getCustomersUseCase.getByCustomerId(any()) } returns createCustomer()
         every { getProductUseCase.getByProductNumbers(any()) } returns listOf(createProduct())
-        every { requestPaymentUseCase.requestPayment(any()) } returns createPaymentResponse()
+        justRun { requestPaymentUseCase.requestPayment(any()) }
     }
 
     @AfterEach

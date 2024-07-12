@@ -6,7 +6,5 @@ import com.fiap.order.driver.web.response.PaymentResponse
 interface PaymentGateway {
     fun findByPaymentId(paymentId: String): PaymentResponse?
 
-    fun requestPayment(order: Order): PaymentResponse
-
     fun notifyRequestPayment(order: Order)
 }

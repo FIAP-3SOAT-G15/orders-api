@@ -18,27 +18,6 @@ class PaymentGatewayImpl(
         return paymentsApiClient.getByPaymentId(paymentId)
     }
 
-    override fun requestPayment(order: Order): PaymentResponse {
-        val paymentHTTPRequest = PaymentRequest(
-            orderInfo = PaymentOrderInfo(
-                number = order.number!!,
-                orderedAt = order.orderedAt,
-                orderedBy = order.customer?.name ?: ANONYMOUS,
-                total = order.total,
-                lines = order.lines.map { orderLine ->
-                    PaymentOrderInfoLine(
-                        name = orderLine.name,
-                        quantity = orderLine.quantity,
-                        unitPrice = orderLine.unitPrice,
-                        total = orderLine.total
-                    )
-                }
-            )
-        )
-
-        return paymentsApiClient.create(paymentHTTPRequest)
-    }
-
     override fun notifyRequestPayment(order: Order) {
         paymentSender.requestPayment(
             paymentRequest = PaymentRequest(
