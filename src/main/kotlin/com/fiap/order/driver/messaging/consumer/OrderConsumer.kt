@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 class OrderConsumer(
     private val createOrderUseCase: CreateOrderUseCase,
-    private val changeOrderStatusUseCase: ChangeOrderStatusUseCase, ) {
+    private val changeOrderStatusUseCase: ChangeOrderStatusUseCase) {
 
     private val log = LoggerFactory.getLogger(javaClass)
 

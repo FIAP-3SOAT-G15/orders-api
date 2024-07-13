@@ -1,5 +1,6 @@
 package com.fiap.order
 
+import com.fiap.order.adapter.gateway.impl.PaymentGatewayImpl.Companion.ANONYMOUS
 import com.fiap.order.domain.entities.Customer
 import com.fiap.order.domain.entities.Order
 import com.fiap.order.domain.entities.OrderItem
@@ -11,9 +12,8 @@ import com.fiap.order.domain.valueobjects.PaymentStatus
 import com.fiap.order.driver.database.persistence.entities.CustomerEntity
 import com.fiap.order.driver.database.persistence.entities.OrderEntity
 import com.fiap.order.driver.database.persistence.entities.OrderLineEntity
-import com.fiap.order.driver.web.request.CustomerRequest
-import com.fiap.order.driver.web.request.OrderItemRequest
-import com.fiap.order.driver.web.request.OrderRequest
+import com.fiap.order.driver.messaging.event.PaymentEvent
+import com.fiap.order.driver.web.request.*
 import com.fiap.order.driver.web.response.PaymentResponse
 import com.fiap.order.driver.web.response.PendingOrderResponse
 import com.fiap.order.driver.web.response.toDomain
@@ -189,4 +189,33 @@ fun createPendingOrderResponse(
 ) = PendingOrderResponse(
     order = order,
     payment = paymentResponse.toDomain(),
+)
+
+
+fun createPaymentRequest(order: Order = createOrder()) = PaymentRequest(
+    orderInfo = PaymentOrderInfo(
+        number = order.number!!,
+        orderedAt = order.orderedAt,
+        orderedBy = order.customer?.name ?: ANONYMOUS,
+        total = order.total,
+        lines = order.lines.map { orderLine ->
+            PaymentOrderInfoLine(
+                name = orderLine.name,
+                quantity = orderLine.quantity,
+                unitPrice = orderLine.unitPrice,
+                total = orderLine.total
+            )
+        }
+    )
+)
+
+fun createPaymentEvent(status: PaymentStatus = PaymentStatus.PENDING) = PaymentEvent(
+    id = "49f285e9-f748-4f57-ad58-eb6c72cd734e",
+    orderNumber = 1,
+    externalOrderId = "66b0f5f7-9997-4f49-a203-3dab2d936b51",
+    externalOrderGlobalId = null,
+    paymentInfo = "10020101021243650016COM.MERCADOLIBRE...",
+    createdAt = LocalDateTime.parse("2024-06-01T18:00:00"),
+    status = status,
+    statusChangedAt = LocalDateTime.parse("2023-10-01T18:00:00"),
 )

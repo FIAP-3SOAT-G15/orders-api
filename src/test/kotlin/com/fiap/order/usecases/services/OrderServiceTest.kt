@@ -17,6 +17,7 @@ import com.fiap.order.createPaymentResponse
 import com.fiap.order.createProduct
 import com.fiap.order.createStock
 import com.fiap.order.domain.valueobjects.PaymentStatus
+import com.fiap.order.driver.web.response.toDomain
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
@@ -180,6 +181,30 @@ class OrderServiceTest {
             assertThatThrownBy { orderService.requestCreate(null, items) }
                 .isInstanceOf(SelfOrderManagementException::class.java)
                 .hasFieldOrPropertyWithValue("errorType", ErrorType.EMPTY_ORDER)
+        }
+
+        @Test
+        fun `should accept pending order`() {
+            val payment = createPaymentResponse().toDomain()
+
+            every { orderRepository.findByOrderNumber(payment.orderNumber) } returns createOrder(status = OrderStatus.CREATED)
+            every { orderRepository.upsert(any()) } returns createOrder(status = OrderStatus.PENDING)
+
+            val result  = orderService.acceptPending(payment)
+
+            assertThat(result).isNotNull()
+            assertThat(result.order.status).isEqualTo(OrderStatus.PENDING)
+        }
+
+        @Test
+        fun `should throw an error when order not found`() {
+            val payment = createPaymentResponse().toDomain()
+
+            every { orderRepository.findByOrderNumber(payment.orderNumber) } returns null
+            every { orderRepository.upsert(any()) } returns createOrder(status = OrderStatus.PENDING)
+
+            assertThatThrownBy { orderService.acceptPending(payment) }
+
         }
     }
 
