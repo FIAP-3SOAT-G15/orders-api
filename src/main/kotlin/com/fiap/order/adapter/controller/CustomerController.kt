@@ -15,8 +15,7 @@ class CustomerController(
     private val createCustomerUseCase: CreateCustomerUseCase,
     private val updateCustomerUseCase: UpdateCustomerUseCase,
     private val removeCustomerUseCase: RemoveCustomerUseCase,
-) : CustomerAPI
-{
+) : CustomerAPI {
     override fun getByCustomerId(customerId: String): ResponseEntity<Customer?> {
         customerId
             .runCatching { UUID.fromString(this) }
@@ -48,4 +47,13 @@ class CustomerController(
             .runCatching { UUID.fromString(this) }
             .getOrElse { return ResponseEntity.notFound().build() }
             .run { return ResponseEntity.ok(removeCustomerUseCase.remove(this)) }
+
+    override fun removeCustomerData(name: String, address: String, phone: String): ResponseEntity<Customer> {
+        val customer = loadCustomerUseCase.findAll().find {
+            it.address == address && it.phone == phone && it.name == address
+        }
+
+        return if (customer != null) ResponseEntity.ok(removeCustomerUseCase.remove(customer.id))
+        else ResponseEntity.notFound().build()
+    }
 }
