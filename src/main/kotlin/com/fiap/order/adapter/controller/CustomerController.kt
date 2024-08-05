@@ -49,9 +49,7 @@ class CustomerController(
             .run { return ResponseEntity.ok(removeCustomerUseCase.remove(this)) }
 
     override fun removeCustomerData(name: String, address: String, phone: String): ResponseEntity<Customer> {
-        val customer = loadCustomerUseCase.findAll().find {
-            it.address == address && it.phone == phone && it.name == address
-        }
+        val customer = searchCustomerUseCase.searchByName(name).find { it.address == address && it.phone == phone }
 
         return if (customer != null) ResponseEntity.ok(removeCustomerUseCase.remove(customer.id))
         else ResponseEntity.notFound().build()
