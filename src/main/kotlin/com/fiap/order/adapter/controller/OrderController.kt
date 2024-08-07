@@ -54,7 +54,7 @@ class OrderController(
 
     override fun create(orderRequest: OrderRequest): ResponseEntity<PendingOrderResponse> =
         ResponseEntity.ok(
-            createOrderUseCase.create(
+            createOrderUseCase.requestCreate(
                 customerId = getAuthenticatedCustomerId(),
                 items = orderRequest.toOrderItemsDomain()
             )

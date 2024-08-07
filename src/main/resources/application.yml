@@ -1,4 +1,12 @@
 spring:
+  cloud:
+    aws:
+      endpoint: http://localhost:4566
+      credentials:
+        access-key: localstack
+        secret-key: localstack
+      region:
+        static: ${AWS_REGION}
   application:
     name: orders-api
   datasource:
@@ -32,3 +40,11 @@ clients:
     url: ${STOCK_SERVICE_URL}
   payments-api:
     url: ${PAYMENTS_SERVICE_URL}
+
+
+topic:
+  request-payment: arn:aws:sns:us-east-2:000000000000:request-payment_topic
+
+sqs:
+  queues:
+    request-payment-response: payment-response_queue

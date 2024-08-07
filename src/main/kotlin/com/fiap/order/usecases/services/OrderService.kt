@@ -5,6 +5,7 @@ import com.fiap.order.adapter.gateway.TransactionalGateway
 import com.fiap.order.domain.entities.Order
 import com.fiap.order.domain.entities.OrderItem
 import com.fiap.order.domain.entities.OrderLine
+import com.fiap.order.domain.entities.Payment
 import com.fiap.order.domain.errors.ErrorType
 import com.fiap.order.domain.errors.SelfOrderManagementException
 import com.fiap.order.domain.valueobjects.OrderStatus
@@ -56,7 +57,7 @@ open class OrderService(
     override fun findByStatusAndCustomerId(status: OrderStatus, customerId: UUID): List<Order> =
         orderGateway.findByStatusAndCustomerId(status, customerId)
 
-    override fun create(
+    override fun requestCreate(
         customerId: UUID?,
         items: List<OrderItem>,
     ): PendingOrderResponse {
@@ -87,7 +88,7 @@ open class OrderService(
                 )
             }
 
-            var order = orderGateway.upsert(
+            val order = orderGateway.upsert(
                 Order(
                     number = null,
                     orderedAt = LocalDateTime.now(),
@@ -98,22 +99,34 @@ open class OrderService(
                 )
             )
 
-            order = orderGateway.upsert(
-                order.copy(
-                    status = OrderStatus.PENDING,
-                    lines = order.lines.map { i -> i.copy(orderNumber = order.number) },
-                )
-            )
 
-            val payment = providePaymentRequestUseCase.requestPayment(order)
+            providePaymentRequestUseCase.requestPayment(order)
 
-            log.info("Created order $order and respective payment $payment")
+            log.info("Created order $order ")
 
             PendingOrderResponse(
                 order = order,
-                payment = payment,
+                payment = null,
             )
         }
+    }
+
+    override fun acceptPending(payment: Payment): PendingOrderResponse {
+        return orderGateway.findByOrderNumber(payment.orderNumber)?.let {
+            orderGateway.upsert(
+                it.copy(
+                    status = OrderStatus.PENDING,
+                    lines = it.lines.map { i -> i.copy(orderNumber = it.number) },
+                )
+            )
+        }?.let { orderUpdate ->
+            PendingOrderResponse(order = orderUpdate, payment = payment,).also {
+                log.info("Accepted order $orderUpdate")
+            }
+        } ?: throw SelfOrderManagementException(
+            errorType = ErrorType.ORDER_NOT_FOUND,
+            message = "Order ${payment.orderNumber} should exist in the database",
+        )
     }
 
     override fun confirmOrder(orderNumber: Long): Order {

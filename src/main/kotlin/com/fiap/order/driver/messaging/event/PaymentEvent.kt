@@ -1,10 +1,10 @@
-package com.fiap.order.driver.web.response
+package com.fiap.order.driver.messaging.event
 
 import com.fiap.order.domain.entities.Payment
 import com.fiap.order.domain.valueobjects.PaymentStatus
 import java.time.LocalDateTime
 
-data class PaymentResponse(
+data class PaymentEvent(
     val id: String,
     val orderNumber: Long,
     val externalOrderId: String,
@@ -15,8 +15,7 @@ data class PaymentResponse(
     val statusChangedAt: LocalDateTime,
 )
 
-
-fun PaymentResponse.toDomain() = Payment(
+fun PaymentEvent.toDomain() = Payment(
     id = id,
     orderNumber = orderNumber,
     externalOrderId = externalOrderId,

@@ -15,6 +15,7 @@ import com.fiap.order.adapter.gateway.impl.PaymentGatewayImpl
 import com.fiap.order.adapter.gateway.impl.ProductGatewayImpl
 import com.fiap.order.adapter.gateway.impl.StockGatewayImpl
 import com.fiap.order.adapter.gateway.impl.TransactionalGatewayImpl
+import com.fiap.order.adapter.messaging.sender.PaymentSender
 import com.fiap.order.driver.database.persistence.jpa.CustomerJpaRepository
 import com.fiap.order.driver.database.persistence.jpa.OrderJpaRepository
 import org.springframework.context.annotation.Bean
@@ -51,7 +52,7 @@ class GatewayConfig {
     }
 
     @Bean("PaymentGateway")
-    fun createPaymentGateway(paymentsApiClient: PaymentsApiClient): PaymentGateway {
-        return PaymentGatewayImpl(paymentsApiClient)
+    fun createPaymentGateway(paymentsApiClient: PaymentsApiClient, paymentSender: PaymentSender): PaymentGateway {
+        return PaymentGatewayImpl(paymentsApiClient, paymentSender)
     }
 }

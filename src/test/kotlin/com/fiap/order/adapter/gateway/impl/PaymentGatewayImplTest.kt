@@ -1,9 +1,11 @@
 package com.fiap.order.adapter.gateway.impl
 
 import com.fiap.order.adapter.client.PaymentsApiClient
+import com.fiap.order.adapter.messaging.sender.PaymentSender
 import com.fiap.order.createOrder
 import com.fiap.order.createPaymentResponse
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.unmockkAll
 import org.assertj.core.api.Assertions.assertThat
@@ -13,10 +15,11 @@ import java.util.*
 
 class PaymentGatewayImplTest {
     private val paymentsApiClient = mockk<PaymentsApiClient>()
+    private val paymentSender = mockk<PaymentSender>()
 
     private val paymentGatewayImpl =
         PaymentGatewayImpl(
-            paymentsApiClient,
+            paymentsApiClient, paymentSender
         )
 
     @AfterEach
@@ -39,12 +42,10 @@ class PaymentGatewayImplTest {
     @Test
     fun `should obtain payment`() {
         val order = createOrder(number = 1)
-        val paymentResponse = createPaymentResponse(orderNumber = order.number!!)
+
+        justRun { paymentSender.requestPayment(any()) }
         
-        every { paymentsApiClient.create(any()) } returns paymentResponse
+        paymentGatewayImpl.notifyRequestPayment(order)
         
-        val result = paymentGatewayImpl.requestPayment(order)
-        
-        assertThat(result).isEqualTo(paymentResponse)
     }
 }

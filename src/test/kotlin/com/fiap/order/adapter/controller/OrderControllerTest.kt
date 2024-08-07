@@ -123,13 +123,13 @@ class OrderControllerTest {
         val items = orderRequest.items.map { it.toOrderItem() }
         val pendingOrderResponse = createPendingOrderResponse()
 
-        every { createOrderUseCase.create(null, items) } returns pendingOrderResponse
+        every { createOrderUseCase.requestCreate(null, items) } returns pendingOrderResponse
 
         val result = orderController.create(orderRequest)
 
         assertThat(result.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(result.body).isEqualTo(pendingOrderResponse)
-        verify(exactly = 1) { createOrderUseCase.create(null, items) }
+        verify(exactly = 1) { createOrderUseCase.requestCreate(null, items) }
     }
 
     @Test
