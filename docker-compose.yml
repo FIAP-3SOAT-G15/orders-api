@@ -1,4 +1,4 @@
-version: '3.7'
+name: orders-api
 
 services:
   orders_api:
@@ -8,10 +8,11 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - orders_db
+      orders_db:
+        condition: service_healthy
     environment:
       DB_ENDPOINT: orders_db:5432
-      DB_NAME: selforder
+      DB_NAME: orders
       DB_USERNAME: selforder
       DB_PASSWORD: self@Order123!
       ADMIN_ACCESS_TOKEN: token
@@ -20,6 +21,11 @@ services:
     ports:
       - "8080:8080"
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   orders_db:
     image: postgres:15.4
@@ -33,7 +39,11 @@ services:
     ports:
       - "5434:5432"
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   orders_db:
-    driver: local
