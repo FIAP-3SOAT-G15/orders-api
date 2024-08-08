@@ -1,5 +1,6 @@
 package com.fiap.order
 
+import com.fiap.order.it.JWTSecurityTestConfig
 import com.fiap.order.it.LocalStackContainerInitializer
 import com.fiap.order.it.PostgreSQLContainerInitializer
 import com.fiap.order.it.LocalStackTestConfig
@@ -25,6 +26,7 @@ annotation class IntegrationTest
         LocalStackTestConfig::class,
         FeignAutoConfiguration::class,
         ServletWebServerFactoryAutoConfiguration::class,
+        JWTSecurityTestConfig::class,
     ]
 )
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FILE)
