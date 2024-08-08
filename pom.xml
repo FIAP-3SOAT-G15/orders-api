@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.4</version>
+        <version>3.2.8</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.fiap</groupId>
@@ -19,8 +19,9 @@
         <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
 
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
+        <awsspringcloud.version>3.2.0-M1</awsspringcloud.version>
         <testcontainers.version>1.19.1</testcontainers.version>
-        
+
         <skipITs>true</skipITs>
         <skipOpenAPIGen>true</skipOpenAPIGen>
         
@@ -43,16 +44,17 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/io.awspring.cloud/spring-cloud-aws-starter-sns -->
+        <dependency>
+            <groupId>io.awspring.cloud</groupId>
+            <artifactId>spring-cloud-aws-starter</artifactId>
+        </dependency>
         <dependency>
             <groupId>io.awspring.cloud</groupId>
             <artifactId>spring-cloud-aws-starter-sns</artifactId>
-            <version>3.2.0-M1</version>
         </dependency>
         <dependency>
             <groupId>io.awspring.cloud</groupId>
             <artifactId>spring-cloud-aws-starter-sqs</artifactId>
-            <version>3.2.0-M1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
@@ -103,6 +105,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>localstack</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
@@ -149,8 +156,16 @@
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
     </dependencies>
+
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.awspring.cloud</groupId>
+                <artifactId>spring-cloud-aws-dependencies</artifactId>
+                <version>${awsspringcloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers-bom</artifactId>
@@ -160,6 +175,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
     <build>
         <finalName>orders</finalName>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>

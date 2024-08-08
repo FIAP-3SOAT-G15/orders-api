@@ -1,11 +1,6 @@
 {
   "properties": [
     {
-      "name": "admin.access-token",
-      "type": "java.lang.String",
-      "description": "Description for admin-access-token."
-    },
-    {
       "name": "payment-provider.mock",
       "type": "java.lang.String",
       "description": "Description for payment-provider.mock."
@@ -34,6 +29,21 @@
       "name": "mercadopago.integration.webhookBaseUrl",
       "type": "java.lang.String",
       "description": "Description for mercadopago.integration.webhookBaseUrl."
+    },
+    {
+      "name": "sqs.queues.request-payment-response",
+      "type": "java.lang.String",
+      "description": "Description for sqs.queues.request-payment-response."
+    },
+    {
+      "name": "sns.topics.request-payment",
+      "type": "java.lang.String",
+      "description": "Description for sns.topics.request-payment."
+    },
+    {
+      "name": "security.enable",
+      "type": "java.lang.String",
+      "description": "Description for security.enable."
     }
   ]
 }

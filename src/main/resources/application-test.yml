@@ -1,2 +1,5 @@
-admin:
-  access-token: token
+clients:
+  stock-api:
+    url: http://stock.stock
+  payments-api:
+    url: http://payments.payments

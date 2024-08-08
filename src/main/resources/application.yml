@@ -1,12 +1,4 @@
 spring:
-  cloud:
-    aws:
-      endpoint: http://localhost:4566
-      credentials:
-        access-key: localstack
-        secret-key: localstack
-      region:
-        static: ${AWS_REGION}
   application:
     name: orders-api
   datasource:
@@ -25,15 +17,6 @@ spring:
             non_contextual_creation: true
         ddl-auto: validate
         globally_quoted_identifiers: true
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_ygM5FRn7D
-          jwk-set-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_ygM5FRn7D/.well-known/jwks.json
-
-admin:
-  access-token: ${ADMIN_ACCESS_TOKEN}
 
 clients:
   stock-api:
@@ -41,10 +24,13 @@ clients:
   payments-api:
     url: ${PAYMENTS_SERVICE_URL}
 
-
-topic:
-  request-payment: arn:aws:sns:us-east-2:000000000000:request-payment_topic
-
 sqs:
   queues:
     request-payment-response: payment-response_queue
+
+sns:
+  topics:
+    request-payment: request-payment_topic
+
+security:
+  enable: false
