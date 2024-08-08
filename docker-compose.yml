@@ -15,7 +15,6 @@ services:
       DB_NAME: orders
       DB_USERNAME: selforder
       DB_PASSWORD: self@Order123!
-      ADMIN_ACCESS_TOKEN: token
       STOCK_SERVICE_URL: http://localhost:8081
       PAYMENTS_SERVICE_URL: http://localhost:8082
     ports:

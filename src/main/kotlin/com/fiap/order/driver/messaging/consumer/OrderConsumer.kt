@@ -18,7 +18,6 @@ class OrderConsumer(
 
     private val log = LoggerFactory.getLogger(javaClass)
 
-
     @SqsListener("\${sqs.queues.request-payment-response}")
     fun onMessage(message: PaymentEvent, @Headers headers: MessageHeaders) {
         log.info("Event from payment response received $message")

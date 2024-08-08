@@ -1,4 +1,4 @@
-package com.fiap.order
+package com.fiap.order.it
 
 import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
@@ -12,9 +12,9 @@ class PostgreSQLContainerInitializer :
     companion object {
         private val instance: PostgreSQLContainerInitializer =
             PostgreSQLContainerInitializer()
-                .withDatabaseName("selforder")
-                .withUsername("selforder")
-                .withPassword("self@Order123!")
+                .withDatabaseName("database")
+                .withUsername("database")
+                .withPassword("database")
                 .waitingFor(forListeningPort())
     }
 

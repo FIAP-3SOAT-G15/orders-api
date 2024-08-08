@@ -1,0 +1,15 @@
+spring:
+  cloud:
+    aws:
+      endpoint: http://localhost:4566
+      credentials:
+        access-key: localstack
+        secret-key: localstack
+      region:
+        static: ${AWS_REGION}
+
+clients:
+  stock-api:
+    url: http://stock.stock
+  payments-api:
+    url: http://payments.payments
