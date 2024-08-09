@@ -44,6 +44,8 @@ module "db" {
   backup_retention_period = 0
   skip_final_snapshot     = true
   deletion_protection     = false
+
+  tags = var.tags
 }
 
 module "security_group" {
@@ -61,6 +63,8 @@ module "security_group" {
       cidr_blocks = data.terraform_remote_state.tech-challenge.outputs.vpc_cidr_block
     },
   ]
+
+  tags = var.tags
 }
 
 module "rds_params" {
@@ -73,6 +77,8 @@ module "rds_params" {
     endpoint : module.db.db_instance_endpoint,
     port : local.port
   })
+
+  tags = var.tags
 }
 
 resource "aws_iam_policy" "rds_secrets_read_only_policy" {
@@ -91,6 +97,8 @@ resource "aws_iam_policy" "rds_secrets_read_only_policy" {
       }
     ]
   })
+
+  tags = var.tags
 }
 
 resource "aws_iam_policy" "rds_params_read_only_policy" {
@@ -109,4 +117,6 @@ resource "aws_iam_policy" "rds_params_read_only_policy" {
       }
     ]
   })
+
+  tags = var.tags
 }
