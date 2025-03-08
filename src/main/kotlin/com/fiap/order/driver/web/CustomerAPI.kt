@@ -89,4 +89,11 @@ interface CustomerAPI {
     fun remove(
         @Parameter(description = "Identificador do cliente") @PathVariable("customerId") customerId: String,
     ): ResponseEntity<Customer>
+
+    @DeleteMapping("/{name}/{address}/{phone}")
+    fun removeCustomerData(
+        @Parameter(description = "Nome do cliente") @PathVariable("name") name: String,
+        @Parameter(description = "Endereço do cliente") @PathVariable("address") address: String,
+        @Parameter(description = "Telefone do cliente") @PathVariable("phone") phone: String,
+    ): ResponseEntity<Customer>
 }
